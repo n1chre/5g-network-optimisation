@@ -1,0 +1,42 @@
+Instance defines the problem and network topology
+
+========================================================================
+
+It can have 3 types of values defined: single_value, array, matrix
+
+Grammar for defining looks like this:
+list = [X1,X2,X3,...]
+
+single_value = X;
+
+array = list;
+
+matrix = [ // or {
+list
+list
+...
+]; // or };
+
+========================================================================
+
+// TODO make file more robust: parse file in proper way, comments
+It must have values mentioned bellow with matching types.
+They have to be written in this specific order.
+Empty lines are ignored.
+
+single_value numServers;
+single_value numVns;
+single_value numNodes;
+single_value numRes;
+single_value numServiceChains;
+array P_max;
+array P_min;
+matrix req;
+matrix av;
+matrix al;
+matrix sc;
+array P;
+matrix Edges;
+matrix VnDemands;
+array lat;
+

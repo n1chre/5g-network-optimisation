@@ -1,4 +1,4 @@
-package hr.fer.tel.hmo.config;
+package hr.fer.tel.hmo.network;
 
 import java.util.HashMap;
 import java.util.LinkedList;

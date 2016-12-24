@@ -1,4 +1,4 @@
-package hr.fer.tel.hmo.config;
+package hr.fer.tel.hmo.network;
 
 /**
  * Link between two nodes in a network.

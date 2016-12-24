@@ -1,8 +1,8 @@
 package hr.fer.tel.hmo.instance;
 
-import hr.fer.tel.hmo.config.Link;
-import hr.fer.tel.hmo.config.Network;
-import hr.fer.tel.hmo.config.Node;
+import hr.fer.tel.hmo.network.Link;
+import hr.fer.tel.hmo.network.Network;
+import hr.fer.tel.hmo.network.Node;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,12 +16,12 @@ import java.util.List;
 public class Instance {
 
 	/**
-	 * Number of servers in config
+	 * Number of servers in network
 	 */
 	private int numberOfServers;
 
 	/**
-	 * Number of virtual config functions
+	 * Number of virtual network functions
 	 */
 	private int numberOfVns;
 
@@ -31,7 +31,7 @@ public class Instance {
 	private int numberOfResources;
 
 	/**
-	 * Number of nodes in config
+	 * Number of nodes in network
 	 */
 	private int numberOfNodes;
 

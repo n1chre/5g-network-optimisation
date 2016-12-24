@@ -1,7 +1,7 @@
 numServers = 3;
 numVns = 5;
-numNodes = 6;
 numRes = 2;
+numNodes = 6;
 numServiceChains = 2;
 P_max = [160.0, 180.0, 150.0];
 P_min = [45, 55, 40];

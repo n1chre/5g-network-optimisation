@@ -1,7 +1,12 @@
 package hr.fer.tel.hmo.instance;
 
+import hr.fer.tel.hmo.config.Link;
+import hr.fer.tel.hmo.config.Network;
+import hr.fer.tel.hmo.config.Node;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -129,9 +134,105 @@ public class Instance {
 	}
 
 	/**
+	 * Create a network object from this instance
+	 *
+	 * @return network
+	 */
+	public Network configureNetwork() {
+		Network net = new Network(numberOfNodes, numberOfServers);
+
+		// configure nodes
+		int nodeIndex = 0;
+		for (double power : PNode) {
+			if (power < 0) {
+				networkException("Power consumption can't be negative");
+			}
+			Node node = new Node(nodeIndex++, power);
+			if (!net.addNode(node)) {
+				networkException("Can't add any more nodes");
+			}
+		}
+
+		// connect nodes with links
+		for (List<Double> edge : edges) {
+			int n1 = edge.get(0).intValue() - 1;
+			int n2 = edge.get(1).intValue() - 1;
+			double bandwidth = edge.get(2);
+			double powerConsumption = edge.get(3);
+			double delay = edge.get(4);
+
+			if (bandwidth < 0) {
+				networkException("Bandwidth can't be negative");
+			}
+			if (powerConsumption < 0) {
+				networkException("Power consumption can't be negative");
+			}
+			if (delay < 0) {
+				networkException("Delay can't be negative");
+			}
+
+			Link link = new Link(bandwidth, powerConsumption, delay);
+			if (!net.addLink(n1, n2, link)) {
+				networkException("Invalid node indexes for link: " + edge);
+			}
+		}
+
+		// create servers
+		for (int serverIndex = 0; serverIndex < numberOfServers; serverIndex++) {
+			double pmin = PMin.get(serverIndex);
+			double pmax = PMax.get(serverIndex);
+
+			if (pmin < 0 || pmax < 0) {
+				networkException("Power consumption can't be negative");
+			}
+
+			List<Double> resources = new ArrayList<>(numberOfResources);
+			for (List<Double> list : resourceAvailability) {
+				double res = list.get(serverIndex);
+				if (res < 0) {
+					networkException("Resource need can't be negative");
+				}
+				resources.add(res);
+			}
+
+			int nodeIdx = 0;
+			for (Double d : serverPlacement.get(serverIndex)) {
+				if (1 == d.intValue()) {
+					break;
+				}
+				nodeIdx++;
+			}
+
+			if (nodeIdx == numberOfNodes) {
+				continue; // no node was found
+			}
+
+			if (!net.connectServer(serverIndex, pmin, pmax, nodeIdx, resources)) {
+				networkException("Server configured badly");
+			}
+		}
+
+		return net;
+	}
+
+	/**
+	 * Throw exception when configuring network
+	 *
+	 * @param msg message
+	 */
+	private static void networkException(String msg) {
+		throw new IllegalArgumentException("[Network:Conf] " + msg);
+	}
+
+	/**
 	 * @return true if instance is properly configured
 	 */
 	public boolean isValid() {
+
+		if (numberOfServers <= 0 || numberOfServers <= 0 || numberOfVns <= 0
+				|| numberOfResources <= 0 || numberOfServiceChains <= 0) {
+			return false;
+		}
 
 		// check arrays
 

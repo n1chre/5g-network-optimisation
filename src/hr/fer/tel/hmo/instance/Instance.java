@@ -11,12 +11,12 @@ import java.util.List;
 public class Instance {
 
 	/**
-	 * Number of servers in network
+	 * Number of servers in config
 	 */
 	private int numberOfServers;
 
 	/**
-	 * Number of virtual network functions
+	 * Number of virtual config functions
 	 */
 	private int numberOfVns;
 
@@ -26,7 +26,7 @@ public class Instance {
 	private int numberOfResources;
 
 	/**
-	 * Number of nodes in network
+	 * Number of nodes in config
 	 */
 	private int numberOfNodes;
 
@@ -55,7 +55,7 @@ public class Instance {
 
 	/**
 	 * Represents in what order is each resource available at each server.
-	 * resourceAvailability[resourceIndex][componentIndex]
+	 * resourceAvailability[resourceIndex][serverIndex]
 	 */
 	private List<List<Double>> resourceAvailability;
 
@@ -128,63 +128,94 @@ public class Instance {
 		return instance;
 	}
 
-	public int getNumberOfServers() {
-		return numberOfServers;
+	/**
+	 * @return true if instance is properly configured
+	 */
+	public boolean isValid() {
+
+		// check arrays
+
+		if (!checkArray(PMax, numberOfServers)) {
+			return false;
+		}
+
+		if (!checkArray(PMin, numberOfServers)) {
+			return false;
+		}
+
+		if (!checkArray(PNode, numberOfNodes)) {
+			return false;
+		}
+
+		if (!checkArray(maximalLatency, numberOfServiceChains)) {
+			return false;
+		}
+
+		// check matrix
+
+		if (!checkMatrix(requirements, numberOfResources, numberOfVns)) {
+			return false;
+		}
+
+		if (!checkMatrix(resourceAvailability, numberOfResources, numberOfServers)) {
+			return false;
+		}
+
+		if (!checkMatrix(serverPlacement, numberOfServers, numberOfNodes)) {
+			return false;
+		}
+
+		if (!checkMatrix(serviceChain, numberOfServiceChains, numberOfVns)) {
+			return false;
+		}
+
+		if (!checkMatrix(edges, -1, 5)) {
+			return false;
+		}
+
+		if (!checkMatrix(vnfDemands, -1, 3)) {
+			return false;
+		}
+
+		return true;
 	}
 
-	public int getNumberOfVns() {
-		return numberOfVns;
+	/**
+	 * Check if matrix dimensions are n rows by m columns.
+	 * If n=-1, only columns are checked
+	 *
+	 * @param matrix matrix to check
+	 * @param n      expected number of rows
+	 * @param m      expected number of columns
+	 * @return true if matrix is n x m
+	 */
+	private static boolean checkMatrix(List<List<Double>> matrix, int n, int m) {
+		if (matrix == null) {
+			return false;
+		}
+
+		if (n >= 0 && matrix.size() != n) {
+			return false;
+		}
+
+		for (List<Double> row : matrix) {
+			if (row.size() != m) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
-	public int getNumberOfResources() {
-		return numberOfResources;
+	/**
+	 * Check if size of given array is n
+	 *
+	 * @param array array to check
+	 * @param n     expected size
+	 * @return true if it is of expected size
+	 */
+	private static boolean checkArray(List<Double> array, int n) {
+		return array != null && array.size() == n;
 	}
 
-	public int getNumberOfNodes() {
-		return numberOfNodes;
-	}
-
-	public int getNumberOfServiceChains() {
-		return numberOfServiceChains;
-	}
-
-	public List<Double> getPMax() {
-		return PMax;
-	}
-
-	public List<Double> getPMin() {
-		return PMin;
-	}
-
-	public List<List<Double>> getRequirements() {
-		return requirements;
-	}
-
-	public List<List<Double>> getResourceAvailability() {
-		return resourceAvailability;
-	}
-
-	public List<List<Double>> getServerPlacement() {
-		return serverPlacement;
-	}
-
-	public List<List<Double>> getServiceChain() {
-		return serviceChain;
-	}
-
-	public List<Double> getPNode() {
-		return PNode;
-	}
-
-	public List<List<Double>> getEdges() {
-		return edges;
-	}
-
-	public List<List<Double>> getVnfDemands() {
-		return vnfDemands;
-	}
-
-	public List<Double> getMaximalLatency() {
-		return maximalLatency;
-	}
 }

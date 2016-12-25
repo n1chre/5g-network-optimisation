@@ -121,6 +121,21 @@ public class Network {
 	}
 
 	/**
+	 * Get link between two nodes
+	 *
+	 * @param from index of first node
+	 * @param to   index of second node
+	 * @return link between two nodes or null if such doesn't exist
+	 */
+	public Link getLink(int from, int to) {
+		Map<Integer, Link> map = links.get(from);
+		if (map == null) {
+			return null;
+		}
+		return map.get(to);
+	}
+
+	/**
 	 * Connect new server to this network
 	 *
 	 * @param serverIndex server's index

@@ -1,9 +1,12 @@
 package hr.fer.tel.hmo.solution;
 
+import hr.fer.tel.hmo.network.Link;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.vnf.Component;
 
 import java.util.BitSet;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class knows how to evaluate given placement and routing
@@ -37,11 +40,11 @@ public class Evaluator {
 	 * @return total power consumption
 	 */
 	public double evaluate(Placement placement, Routing routing) {
-
 		double sol = 0.0;
 
 		BitSet usedNodes = new BitSet(network.getNumberOfNodes());
 		BitSet usedServers = new BitSet(network.getNumberOfServers());
+		Set<Link> usedLinks = new HashSet<>();
 
 		for (Component c : components) {
 			int serverIndex = placement.getPlacementFor(c);
@@ -60,17 +63,24 @@ public class Evaluator {
 
 			int nIdxFrom = extractNodeIndex(placement, r, true);
 			int nIdxTo = extractNodeIndex(placement, r, false);
+
+			// mark nodes as used
+			// add used link powers
 			usedNodes.set(nIdxFrom);
-			usedNodes.set(nIdxTo);
+			int lastIdx = nIdxFrom;
 			for (int idx : intermediate) {
 				usedNodes.set(idx);
+				sol += network.getLink(lastIdx, idx).getPowerConsumption();
+				lastIdx = idx;
 			}
+			usedNodes.set(nIdxTo);
+			sol += network.getLink(lastIdx, nIdxTo).getPowerConsumption();
 		}
 
 		// minimal power used by server (only count those which are on)
 		sol += usedNodes.stream().mapToDouble(i -> network.getServer(i).getPmin()).sum();
 
-		// power used by nodes
+		// power used by nodes (only count those which are used)
 		sol += usedNodes.stream().mapToDouble(i -> network.getNode(i).getPowerConsumption()).sum();
 
 		return sol;

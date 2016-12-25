@@ -3,9 +3,11 @@ package hr.fer.tel.hmo.solution;
 import hr.fer.tel.hmo.network.Link;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.vnf.Component;
+import hr.fer.tel.hmo.vnf.ServiceChain;
 
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,9 +25,23 @@ public class Evaluator {
 	 */
 	private Component[] components;
 
-	public Evaluator(Network network, Component[] components) {
+	/**
+	 * List of service chains
+	 */
+	private List<ServiceChain> serviceChains;
+
+	public Evaluator(Network network, Component[] components, List<ServiceChain> serviceChains) {
 		this.network = network;
 		this.components = components;
+		this.serviceChains = serviceChains;
+	}
+
+	public boolean isValid(Placement placement) {
+		return false;
+	}
+
+	public boolean isValid(Solution solution) {
+		return false;
 	}
 
 	/**
@@ -35,11 +51,13 @@ public class Evaluator {
 	 * 2. power used by links
 	 * 3. power used by nodes
 	 *
-	 * @param placement placement of components
-	 * @param routing   all routes through a network
+	 * @param solution possible solution
 	 * @return total power consumption
 	 */
-	public double evaluate(Placement placement, Routing routing) {
+	public double evaluate(Solution solution) {
+		Placement placement = solution.getPlacement();
+		List<Route> routes = solution.getRoutes();
+
 		double sol = 0.0;
 
 		BitSet usedNodes = new BitSet(network.getNumberOfNodes());
@@ -53,52 +71,47 @@ public class Evaluator {
 			sol += network.getServer(serverIndex).getAdditionalPower(c);
 		}
 
-		for (Route r : routing) {
-			int[] intermediate = r.getIntermediate();
-			if (intermediate.length == 0) {
+		for (Route r : routes) {
+			int[] nodes = r.getNodes();
+			if (nodes[0] == nodes[nodes.length - 1]) {
 				// no intermediate nodes
 				// components are on servers that are connected to the same node
 				continue;
 			}
 
-			int nIdxFrom = extractNodeIndex(placement, r, true);
-			int nIdxTo = extractNodeIndex(placement, r, false);
-
 			// mark nodes as used
 			// add used link powers
-			usedNodes.set(nIdxFrom);
-			int lastIdx = nIdxFrom;
-			for (int idx : intermediate) {
-				usedNodes.set(idx);
-				sol += network.getLink(lastIdx, idx).getPowerConsumption();
-				lastIdx = idx;
+			usedNodes.set(nodes[0]);
+			for (int i = 1; i < nodes.length; i++) {
+				usedLinks.add(network.getLink(nodes[i - 1], nodes[i]));
+				usedNodes.set(nodes[i]);
 			}
-			usedNodes.set(nIdxTo);
-			sol += network.getLink(lastIdx, nIdxTo).getPowerConsumption();
 		}
 
+		// power used by links
+		sol += usedLinks.parallelStream().mapToDouble(Link::getPowerConsumption).sum();
+
 		// minimal power used by server (only count those which are on)
-		sol += usedNodes.stream().mapToDouble(i -> network.getServer(i).getPmin()).sum();
+		sol += usedNodes.stream().parallel().mapToDouble(i -> network.getServer(i).getPmin()).sum();
 
 		// power used by nodes (only count those which are used)
-		sol += usedNodes.stream().mapToDouble(i -> network.getNode(i).getPowerConsumption()).sum();
+		sol += usedNodes.stream().parallel().mapToDouble(i -> network.getNode(i).getPowerConsumption()).sum();
 
 		return sol;
 	}
 
-	/**
-	 * This is a helper function used for extracting node index.
-	 * Return index of node that has a server connected which has a component on it.
-	 * Component index is f(r);
-	 *
-	 * @param p    placement of components
-	 * @param r    route we want to analyze
-	 * @param from true if we want to get component that is marked as <code>from</code> in given route
-	 * @return index of a node
-	 */
-	private int extractNodeIndex(Placement p, Route r, boolean from) {
-		int idx = from ? r.getFrom() : r.getTo();
-		return network.getServer(p.getPlacementFor(components[idx])).getNode().getIndex();
-	}
+//	/**
+//	 * This is a helper function used for extracting node index.
+//	 * Return index of node that has a server connected which has a component on it.
+//	 *
+//	 * @param p    placement of components
+//	 * @param r    route we want to analyze
+//	 * @param from true if we want to get component that is marked as <code>from</code> in given route
+//	 * @return index of a node
+//	 */
+//	private int extractNodeIndex(Placement p, Route r, boolean from) {
+//		int idx = from ? r.getFrom() : r.getTo();
+//		return network.getServer(p.getPlacementFor(components[idx])).getNode().getIndex();
+//	}
 
 }

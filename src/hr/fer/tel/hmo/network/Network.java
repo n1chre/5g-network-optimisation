@@ -1,7 +1,6 @@
 package hr.fer.tel.hmo.network;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,9 +20,9 @@ public class Network {
 	private Server[] servers;
 
 	/**
-	 * Maps nodes to a list of links (incoming and outgoing)
+	 * links[from][to] = link
 	 */
-	private Map<Node, List<Link>> links;
+	private Map<Integer, Map<Integer, Link>> links;
 
 	/**
 	 * Create a new network with desired number of nodes and servers.
@@ -86,7 +85,6 @@ public class Network {
 		}
 
 		nodes[index] = node;
-		links.put(node, new LinkedList<>());
 
 		return true;
 	}
@@ -94,14 +92,12 @@ public class Network {
 	/**
 	 * Add a new link between two nodes. Links are considered as bidirectional
 	 *
-	 * @param n1               first node index
-	 * @param n2               second node index
-	 * @param bandwidth        link's bandwidth
-	 * @param powerConsumption link's power consumption
-	 * @param delay            link's delay
+	 * @param n1   first node index
+	 * @param n2   second node index
+	 * @param link link between two nodes
 	 * @return true if link was successfully added
 	 */
-	public boolean addLink(int n1, int n2, double bandwidth, double powerConsumption, double delay) {
+	public boolean addLink(int n1, int n2, Link link) {
 		if (n1 < 0 || n1 >= nodes.length || n2 < 0 || n2 >= nodes.length) {
 			return false;
 		}
@@ -110,17 +106,18 @@ public class Network {
 			return false;
 		}
 
-		Node node1 = nodes[n1];
-		Node node2 = nodes[n2];
 
-		// bidirectional links
-		Link l1 = new Link(node1, node2, bandwidth, powerConsumption, delay);
-		Link l2 = new Link(node2, node1, bandwidth, powerConsumption, delay);
+		if (!links.containsKey(n1)) {
+			links.put(n1, new HashMap<>());
+		}
+		boolean ret = links.get(n1).put(n2, link) == null;
 
-		links.get(node1).add(l1);
-		links.get(node2).add(l2);
+		if (!links.containsKey(n2)) {
+			links.put(n2, new HashMap<>());
+		}
+		ret &= links.get(n2).put(n1, link) == null;
 
-		return true;
+		return ret;
 	}
 
 	/**
@@ -152,4 +149,5 @@ public class Network {
 
 		return true;
 	}
+
 }

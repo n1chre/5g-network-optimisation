@@ -1,6 +1,7 @@
 package hr.fer.tel.hmo.instance;
 
 import hr.fer.tel.hmo.Util;
+import hr.fer.tel.hmo.network.Link;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.network.Node;
 import hr.fer.tel.hmo.vnf.Component;
@@ -199,7 +200,9 @@ public class Instance {
 				networkException("Delay can't be negative");
 			}
 
-			if (!network.addLink(n1, n2, bandwidth, powerConsumption, delay)) {
+			Link link = new Link(bandwidth, powerConsumption, delay);
+
+			if (!network.addLink(n1, n2, link)) {
 				networkException("Invalid node indexes for link: " + edge);
 			}
 		}
@@ -245,6 +248,7 @@ public class Instance {
 	 */
 	private void configureComponents() {
 		components = new Component[numberOfVns];
+		serviceChains = new LinkedList<>();
 
 		// create all components
 		for (int componentIndex = 0; componentIndex < numberOfVns; componentIndex++) {

@@ -1,8 +1,8 @@
 package hr.fer.tel.hmo.network;
 
-import java.util.HashMap;
+import hr.fer.tel.hmo.util.Matrix;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents the whole network in this project.
@@ -22,7 +22,7 @@ public class Network {
 	/**
 	 * links[from][to] = link
 	 */
-	private Map<Integer, Map<Integer, Link>> links;
+	private Matrix<Integer, Integer, Link> links;
 
 	/**
 	 * Create a new network with desired number of nodes and servers.
@@ -34,7 +34,7 @@ public class Network {
 	public Network(int numberOfNodes, int numberOfServers) {
 		nodes = new Node[numberOfNodes];
 		servers = new Server[numberOfServers];
-		links = new HashMap<>();
+		links = new Matrix<>();
 	}
 
 	/**
@@ -106,16 +106,8 @@ public class Network {
 			return false;
 		}
 
-
-		if (!links.containsKey(n1)) {
-			links.put(n1, new HashMap<>());
-		}
-		boolean ret = links.get(n1).put(n2, link) == null;
-
-		if (!links.containsKey(n2)) {
-			links.put(n2, new HashMap<>());
-		}
-		ret &= links.get(n2).put(n1, link) == null;
+		boolean ret = links.put(n1, n2, link) == null;
+		ret &= links.put(n2, n1, link) == null;
 
 		return ret;
 	}
@@ -128,11 +120,7 @@ public class Network {
 	 * @return link between two nodes or null if such doesn't exist
 	 */
 	public Link getLink(int from, int to) {
-		Map<Integer, Link> map = links.get(from);
-		if (map == null) {
-			return null;
-		}
-		return map.get(to);
+		return links.get(from, to);
 	}
 
 	/**

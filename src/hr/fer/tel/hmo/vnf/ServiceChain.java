@@ -1,7 +1,7 @@
 package hr.fer.tel.hmo.vnf;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,7 +19,7 @@ public class ServiceChain implements Iterable<Component> {
 	 * @param latency maximal latency
 	 */
 	public ServiceChain(double latency) {
-		this.components = new LinkedList<>();
+		this.components = new ArrayList<>();
 		this.latency = latency;
 	}
 
@@ -27,8 +27,12 @@ public class ServiceChain implements Iterable<Component> {
 		components.add(component);
 	}
 
-	public List<Component> getComponents() {
-		return components;
+	public Component getComponent(int idx) {
+		return components.get(idx);
+	}
+
+	public int getNumberOfComponents() {
+		return components.size();
 	}
 
 	public double getLatency() {

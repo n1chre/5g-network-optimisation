@@ -3,10 +3,13 @@ package hr.fer.tel.hmo.instance;
 import hr.fer.tel.hmo.Util;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.network.Node;
+import hr.fer.tel.hmo.vnf.Component;
+import hr.fer.tel.hmo.vnf.ServiceChain;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -14,6 +17,23 @@ import java.util.List;
  * Its only job is to transfer values from file to Java and to validate them.
  */
 public class Instance {
+
+	/**
+	 * Network of nodes, servers and links
+	 */
+	private Network network;
+
+	/**
+	 * Components that need to be placed into network
+	 */
+	private List<Component> components;
+
+	/**
+	 * Service chains of components
+	 */
+	private List<ServiceChain> serviceChains;
+
+	// ==============================================================================
 
 	/**
 	 * Number of servers in network
@@ -96,10 +116,11 @@ public class Instance {
 	private List<Double> maximalLatency;
 
 	/**
-	 * Initialize a new instance
+	 * Create a new instance
 	 */
 	private Instance() {
-
+		components = new ArrayList<>();
+		serviceChains = new LinkedList<>();
 	}
 
 	/**
@@ -110,6 +131,7 @@ public class Instance {
 	 */
 	public static Instance readFromStream(InputStream stream) throws IOException {
 		InstanceReader reader = new InstanceReader(stream);
+
 		Instance instance = new Instance();
 
 		instance.numberOfServers = reader.singleValue().intValue();
@@ -135,16 +157,17 @@ public class Instance {
 			throw new IllegalArgumentException("Instance configuration is not valid");
 		}
 
+		instance.configureNetwork();
+		instance.configureComponents();
+
 		return instance;
 	}
 
 	/**
-	 * Create a network object from this instance
-	 *
-	 * @return network
+	 * Configure the whole network
 	 */
-	public Network configureNetwork() {
-		Network net = new Network(numberOfNodes, numberOfServers);
+	private void configureNetwork() {
+		network = new Network(numberOfNodes, numberOfServers);
 
 		// configure nodes
 		int nodeIndex = 0;
@@ -153,7 +176,7 @@ public class Instance {
 				networkException("Power consumption can't be negative");
 			}
 			Node node = new Node(nodeIndex++, power);
-			if (!net.addNode(node)) {
+			if (!network.addNode(node)) {
 				networkException("Can't add any more nodes");
 			}
 		}
@@ -176,7 +199,7 @@ public class Instance {
 				networkException("Delay can't be negative");
 			}
 
-			if (!net.addLink(n1, n2, bandwidth, powerConsumption, delay)) {
+			if (!network.addLink(n1, n2, bandwidth, powerConsumption, delay)) {
 				networkException("Invalid node indexes for link: " + edge);
 			}
 		}
@@ -211,12 +234,72 @@ public class Instance {
 				continue; // no node was found
 			}
 
-			if (!net.connectServer(serverIndex, pmin, pmax, nodeIdx, resources)) {
+			if (!network.connectServer(serverIndex, pmin, pmax, nodeIdx, resources)) {
 				networkException("Server configured badly");
 			}
 		}
+	}
 
-		return net;
+	/**
+	 * Configure all components
+	 */
+	private void configureComponents() {
+
+		// create all components
+		for (int componentIndex = 0; componentIndex < numberOfVns; componentIndex++) {
+			List<Double> resources = new ArrayList<>(numberOfResources);
+			for (List<Double> list : requirements) {
+				double res = list.get(componentIndex);
+				if (res < 0) {
+					componentException("Resource need can't be negative");
+				}
+				resources.add(res);
+			}
+			components.add(new Component(componentIndex, resources));
+		}
+
+		for (List<Double> demand : vnfDemands) {
+			int ci1 = demand.get(0).intValue() - 1;
+			int ci2 = demand.get(1).intValue() - 1;
+
+			if (ci1 < 0 || ci1 >= numberOfVns || ci2 < 0 || ci2 >= numberOfVns) {
+				componentException("Component index out of bounds: " + vnfDemands);
+			}
+
+			double bandwidth = demand.get(2);
+			if (bandwidth < 0) {
+				componentException("Demanded bandwidth can't be negative");
+			}
+
+			Component c1 = components.get(ci1);
+			Component c2 = components.get(ci2);
+
+			c1.setBandwidth(c2, bandwidth);
+			c2.setBandwidth(c1, bandwidth);
+		}
+
+		// configure service chains
+		for (int scIndex = 0; scIndex < numberOfServiceChains; scIndex++) {
+			List<Double> chain = serviceChain.get(scIndex);
+			double latency = maximalLatency.get(scIndex);
+
+			if (latency < 0) {
+				componentException("Latency can't be negative");
+			}
+
+			ServiceChain sc = new ServiceChain(latency);
+			serviceChains.add(sc);
+
+			for (int componentIndex = 0; componentIndex < chain.size(); componentIndex++) {
+				boolean in = chain.get(componentIndex).intValue() == 1;
+
+				if (in) {
+					Component c = components.get(componentIndex);
+					sc.addComponent(c);
+					c.addServiceChain(sc);
+				}
+			}
+		}
 	}
 
 	/**
@@ -276,6 +359,18 @@ public class Instance {
 		return true;
 	}
 
+	public Network getNetwork() {
+		return network;
+	}
+
+	public List<Component> getComponents() {
+		return components;
+	}
+
+	public List<ServiceChain> getServiceChains() {
+		return serviceChains;
+	}
+
 	/**
 	 * Throw exception when configuring network
 	 *
@@ -283,6 +378,15 @@ public class Instance {
 	 */
 	private static void networkException(String msg) {
 		throw new IllegalArgumentException("[Network:Conf] " + msg);
+	}
+
+	/**
+	 * Throw exception when configuring components/service chains
+	 *
+	 * @param msg message
+	 */
+	private static void componentException(String msg) {
+		throw new IllegalArgumentException("[Component:Conf] " + msg);
 	}
 
 }

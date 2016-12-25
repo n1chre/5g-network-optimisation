@@ -1,6 +1,5 @@
 package hr.fer.tel.hmo.instance;
 
-import hr.fer.tel.hmo.network.Link;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.network.Node;
 
@@ -171,8 +170,7 @@ public class Instance {
 				networkException("Delay can't be negative");
 			}
 
-			Link link = new Link(bandwidth, powerConsumption, delay);
-			if (!net.addLink(n1, n2, link)) {
+			if (!net.addLink(n1, n2, bandwidth, powerConsumption, delay)) {
 				networkException("Invalid node indexes for link: " + edge);
 			}
 		}

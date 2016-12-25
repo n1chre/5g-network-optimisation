@@ -62,12 +62,14 @@ public class Network {
 	/**
 	 * Add a new link between two nodes. Links are considered as bidirectional
 	 *
-	 * @param n1   first node index
-	 * @param n2   second node index
-	 * @param link link
+	 * @param n1               first node index
+	 * @param n2               second node index
+	 * @param bandwidth        link's bandwidth
+	 * @param powerConsumption link's power consumption
+	 * @param delay            link's delay
 	 * @return true if link was successfully added
 	 */
-	public boolean addLink(int n1, int n2, Link link) {
+	public boolean addLink(int n1, int n2, double bandwidth, double powerConsumption, double delay) {
 		if (n1 < 0 || n1 >= nodes.length || n2 < 0 || n2 >= nodes.length) {
 			return false;
 		}
@@ -76,9 +78,15 @@ public class Network {
 			return false;
 		}
 
+		Node node1 = nodes[n1];
+		Node node2 = nodes[n2];
+
 		// bidirectional links
-		links.get(nodes[n1]).add(link);
-		links.get(nodes[n2]).add(link);
+		Link l1 = new Link(node1, node2, bandwidth, powerConsumption, delay);
+		Link l2 = new Link(node2, node1, bandwidth, powerConsumption, delay);
+
+		links.get(node1).add(l1);
+		links.get(node2).add(l2);
 
 		return true;
 	}

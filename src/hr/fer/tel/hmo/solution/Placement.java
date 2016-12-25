@@ -3,6 +3,10 @@ package hr.fer.tel.hmo.solution;
 import hr.fer.tel.hmo.network.Server;
 import hr.fer.tel.hmo.vnf.Component;
 
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
  * Represents a placement of components on servers
  */
@@ -15,12 +19,19 @@ public class Placement {
 	private int[] placement;
 
 	/**
+	 * Number of possible servers
+	 */
+	private int numberOfServers;
+
+	/**
 	 * Create a new empty placement.
 	 *
 	 * @param numberOfComponents number of components
+	 * @param numberOfServers    number of servers
 	 */
-	public Placement(int numberOfComponents) {
+	public Placement(int numberOfComponents, int numberOfServers) {
 		placement = new int[numberOfComponents];
+		this.numberOfServers = numberOfServers;
 	}
 
 	/**
@@ -63,4 +74,18 @@ public class Placement {
 		return placement[componentIndex] - 1;
 	}
 
+	@Override
+	public String toString() {
+		StringJoiner sj = new StringJoiner("\n", "x=[\n", "\n];");
+
+		for (final int sIdx : placement) {
+			sj.add(
+					IntStream.range(0, numberOfServers)
+							.mapToObj(i -> i == sIdx - 1 ? "1" : "0")
+							.collect(Collectors.joining(",", "[", "]"))
+			);
+		}
+
+		return sj.toString();
+	}
 }

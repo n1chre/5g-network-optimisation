@@ -1,5 +1,6 @@
 package hr.fer.tel.hmo.instance;
 
+import hr.fer.tel.hmo.Util;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.network.Node;
 
@@ -129,6 +130,11 @@ public class Instance {
 		instance.maximalLatency = reader.array();
 
 		reader.close();
+
+		if (!instance.isValid()) {
+			throw new IllegalArgumentException("Instance configuration is not valid");
+		}
+
 		return instance;
 	}
 
@@ -214,18 +220,9 @@ public class Instance {
 	}
 
 	/**
-	 * Throw exception when configuring network
-	 *
-	 * @param msg message
-	 */
-	private static void networkException(String msg) {
-		throw new IllegalArgumentException("[Network:Conf] " + msg);
-	}
-
-	/**
 	 * @return true if instance is properly configured
 	 */
-	public boolean isValid() {
+	private boolean isValid() {
 
 		if (numberOfServers <= 0 || numberOfServers <= 0 || numberOfVns <= 0
 				|| numberOfResources <= 0 || numberOfServiceChains <= 0) {
@@ -234,45 +231,45 @@ public class Instance {
 
 		// check arrays
 
-		if (!checkArray(PMax, numberOfServers)) {
+		if (!Util.checkArray(PMax, numberOfServers)) {
 			return false;
 		}
 
-		if (!checkArray(PMin, numberOfServers)) {
+		if (!Util.checkArray(PMin, numberOfServers)) {
 			return false;
 		}
 
-		if (!checkArray(PNode, numberOfNodes)) {
+		if (!Util.checkArray(PNode, numberOfNodes)) {
 			return false;
 		}
 
-		if (!checkArray(maximalLatency, numberOfServiceChains)) {
+		if (!Util.checkArray(maximalLatency, numberOfServiceChains)) {
 			return false;
 		}
 
 		// check matrix
 
-		if (!checkMatrix(requirements, numberOfResources, numberOfVns)) {
+		if (!Util.checkMatrix(requirements, numberOfResources, numberOfVns)) {
 			return false;
 		}
 
-		if (!checkMatrix(resourceAvailability, numberOfResources, numberOfServers)) {
+		if (!Util.checkMatrix(resourceAvailability, numberOfResources, numberOfServers)) {
 			return false;
 		}
 
-		if (!checkMatrix(serverPlacement, numberOfServers, numberOfNodes)) {
+		if (!Util.checkMatrix(serverPlacement, numberOfServers, numberOfNodes)) {
 			return false;
 		}
 
-		if (!checkMatrix(serviceChain, numberOfServiceChains, numberOfVns)) {
+		if (!Util.checkMatrix(serviceChain, numberOfServiceChains, numberOfVns)) {
 			return false;
 		}
 
-		if (!checkMatrix(edges, -1, 5)) {
+		if (!Util.checkMatrix(edges, -1, 5)) {
 			return false;
 		}
 
-		if (!checkMatrix(vnfDemands, -1, 3)) {
+		if (!Util.checkMatrix(vnfDemands, -1, 3)) {
 			return false;
 		}
 
@@ -280,41 +277,12 @@ public class Instance {
 	}
 
 	/**
-	 * Check if matrix dimensions are n rows by m columns.
-	 * If n=-1, only columns are checked
+	 * Throw exception when configuring network
 	 *
-	 * @param matrix matrix to check
-	 * @param n      expected number of rows
-	 * @param m      expected number of columns
-	 * @return true if matrix is n x m
+	 * @param msg message
 	 */
-	private static boolean checkMatrix(List<List<Double>> matrix, int n, int m) {
-		if (matrix == null) {
-			return false;
-		}
-
-		if (n >= 0 && matrix.size() != n) {
-			return false;
-		}
-
-		for (List<Double> row : matrix) {
-			if (row.size() != m) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if size of given array is n
-	 *
-	 * @param array array to check
-	 * @param n     expected size
-	 * @return true if it is of expected size
-	 */
-	private static boolean checkArray(List<Double> array, int n) {
-		return array != null && array.size() == n;
+	private static void networkException(String msg) {
+		throw new IllegalArgumentException("[Network:Conf] " + msg);
 	}
 
 }

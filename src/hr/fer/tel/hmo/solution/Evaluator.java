@@ -2,6 +2,7 @@ package hr.fer.tel.hmo.solution;
 
 import hr.fer.tel.hmo.network.Link;
 import hr.fer.tel.hmo.network.Network;
+import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.vnf.Component;
 import hr.fer.tel.hmo.vnf.ServiceChain;
 
@@ -56,6 +57,7 @@ public class Evaluator {
 	 */
 	public double evaluate(Solution solution) {
 		Placement placement = solution.getPlacement();
+		Matrix<Integer, Integer, Route> routes = solution.getRoutes();
 
 		double sol = 0.0;
 
@@ -70,20 +72,22 @@ public class Evaluator {
 			sol += network.getServer(serverIndex).getAdditionalPower(c);
 		}
 
-		for (Route r : solution.getRoutes().values()) {
-			int[] nodes = r.getNodes();
-			if (nodes[0] == nodes[nodes.length - 1]) {
-				// no intermediate nodes
-				// components are on servers that are connected to the same node
-				continue;
-			}
+		for (Integer from : routes.keys()) {
+			for (Route r : routes.valuesFor(from)) {
+				int[] nodes = r.getNodes();
+				if (nodes[0] == nodes[nodes.length - 1]) {
+					// no intermediate nodes
+					// components are on servers that are connected to the same node
+					continue;
+				}
 
-			// mark nodes as used
-			// add used link powers
-			usedNodes.set(nodes[0]);
-			for (int i = 1; i < nodes.length; i++) {
-				usedLinks.add(network.getLink(nodes[i - 1], nodes[i]));
-				usedNodes.set(nodes[i]);
+				// mark nodes as used
+				// add used link powers
+				usedNodes.set(nodes[0]);
+				for (int i = 1; i < nodes.length; i++) {
+					usedLinks.add(network.getLink(nodes[i - 1], nodes[i]));
+					usedNodes.set(nodes[i]);
+				}
 			}
 		}
 

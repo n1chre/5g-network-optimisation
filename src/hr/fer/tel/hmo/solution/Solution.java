@@ -2,6 +2,7 @@ package hr.fer.tel.hmo.solution;
 
 import hr.fer.tel.hmo.util.Matrix;
 
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -28,9 +29,14 @@ public class Solution {
 
 	@Override
 	public String toString() {
-		String routing = routes.values().stream()
-				.map(Route::toString)
-				.collect(Collectors.joining(",\n", "routes={\n", "\n};"));
+		StringJoiner routing = new StringJoiner(",\n");
+		for (Integer from : routes.keys()) {
+			routing.add(
+					routes.valuesFor(from).stream()
+							.map(Route::toString)
+							.collect(Collectors.joining(",\n", "routes={\n", "\n};"))
+			);
+		}
 		return placement + "\n" + routing;
 	}
 }

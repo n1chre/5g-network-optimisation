@@ -1,12 +1,13 @@
 package hr.fer.tel.hmo.vnf;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Represents a service chain of components
  */
-public class ServiceChain {
+public class ServiceChain implements Iterable<Component> {
 
 	private List<Component> components;
 
@@ -32,5 +33,10 @@ public class ServiceChain {
 
 	public double getLatency() {
 		return latency;
+	}
+
+	@Override
+	public Iterator<Component> iterator() {
+		return components.iterator();
 	}
 }

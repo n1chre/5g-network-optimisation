@@ -1,12 +1,13 @@
 package hr.fer.tel.hmo.solution;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
  * Represents a routing for given problem
  */
-public class Routing {
+public class Routing implements Iterable<Route> {
 
 	/**
 	 * List of all routes
@@ -24,8 +25,9 @@ public class Routing {
 		routes.add(route);
 	}
 
-	public Iterable<Route> getAllRoutes() {
-		return routes;
+	@Override
+	public Iterator<Route> iterator() {
+		return routes.iterator();
 	}
 
 }

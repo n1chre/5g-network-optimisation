@@ -3,9 +3,6 @@ package hr.fer.tel.hmo.solution;
 import hr.fer.tel.hmo.network.Server;
 import hr.fer.tel.hmo.vnf.Component;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Represents a placement of components on servers
  */
@@ -64,21 +61,6 @@ public class Placement {
 	 */
 	public int getPlacementFor(int componentIndex) {
 		return placement[componentIndex] - 1;
-	}
-
-	/**
-	 * Return indexes of servers that have components placed on them
-	 *
-	 * @return indexes of used servers
-	 */
-	public Iterable<Integer> getUsedServers() {
-		Set<Integer> ret = new HashSet<>();
-		for (int s : placement) {
-			if (s > 0) {
-				ret.add(s - 1);
-			}
-		}
-		return ret;
 	}
 
 }

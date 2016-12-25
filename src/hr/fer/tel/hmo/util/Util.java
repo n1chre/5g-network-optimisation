@@ -1,4 +1,4 @@
-package hr.fer.tel.hmo;
+package hr.fer.tel.hmo.util;
 
 import java.util.List;
 

@@ -1,5 +1,8 @@
 package hr.fer.tel.hmo.solution;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 /**
  * Represents a route between two components
  */
@@ -16,15 +19,14 @@ public class Route {
 	private int to;
 
 	/**
-	 * Indexes of intermediate nodes on this route (not including those
-	 * nodes which are connected to servers having these components)
+	 * Indexes of all nodes on this route
 	 */
-	private int[] intermediate;
+	private int[] nodes;
 
-	public Route(int from, int to, int[] intermediate) {
+	public Route(int from, int to, int[] nodes) {
 		this.from = from;
 		this.to = to;
-		this.intermediate = intermediate;
+		this.nodes = nodes;
 	}
 
 	public int getFrom() {
@@ -35,8 +37,8 @@ public class Route {
 		return to;
 	}
 
-	public int[] getIntermediate() {
-		return intermediate;
+	public int[] getNodes() {
+		return nodes;
 	}
 
 	@Override
@@ -61,5 +63,15 @@ public class Route {
 		int result = from;
 		result = 31 * result + to;
 		return result;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("<%d,%d,%s>", from + 1, to + 1,
+				Arrays.stream(nodes)
+						.mapToObj(i -> Integer.toString(i + 1))
+						.collect(Collectors.joining(",","[","]"))
+		);
+
 	}
 }

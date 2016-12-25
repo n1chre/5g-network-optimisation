@@ -3,6 +3,7 @@ package hr.fer.tel.hmo.util;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is a wrapper around matrix class.
@@ -10,7 +11,7 @@ import java.util.Map;
  */
 public class Matrix<K1, K2, V> {
 
-	private final Map<KeyPair<K1, K2>, V> matrix = new HashMap<>();
+	private final Map<K1, Map<K2, V>> matrix = new HashMap<>();
 
 	/**
 	 * Put value into matrix under matrix[k1][k2]
@@ -21,8 +22,8 @@ public class Matrix<K1, K2, V> {
 	 * @return previous value or null if none
 	 */
 	public V put(K1 k1, K2 k2, V v) {
-		KeyPair<K1, K2> kp = new KeyPair<>(k1, k2);
-		return matrix.put(kp, v);
+		matrix.putIfAbsent(k1, new HashMap<>());
+		return matrix.get(k1).put(k2, v);
 	}
 
 	/**
@@ -33,53 +34,31 @@ public class Matrix<K1, K2, V> {
 	 * @return value or null if none
 	 */
 	public V get(K1 k1, K2 k2) {
-		return matrix.get(new KeyPair<>(k1, k2));
+		Map<K2, V> map = matrix.get(k1);
+		return map == null ? null : map.get(k2);
 	}
 
 	/**
-	 * Return values stored in this matrix
-	 *
-	 * @return collection of values
+	 * @param k1 key 1
+	 * @return map that is used for that key
 	 */
-	public Collection<V> values() {
-		return matrix.values();
+	public Map<K2, V> getFor(K1 k1) {
+		return matrix.get(k1);
 	}
 
 	/**
-	 * Represents a pair of keys for matrix
-	 *
-	 * @param <K1> first key type
-	 * @param <K2> second key type
+	 * @return set of main keys
 	 */
-	private static class KeyPair<K1, K2> {
-		K1 k1;
-		K2 k2;
+	public Set<K1> keys() {
+		return matrix.keySet();
+	}
 
-		KeyPair(K1 k1, K2 k2) {
-			this.k1 = k1;
-			this.k2 = k2;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (!(o instanceof Matrix.KeyPair)) {
-				return false;
-			}
-
-			KeyPair<?, ?> keyPair = (KeyPair<?, ?>) o;
-
-			return k1.equals(keyPair.k1) && k2.equals(keyPair.k2);
-		}
-
-		@Override
-		public int hashCode() {
-			int result = k1.hashCode();
-			result = 31 * result + k2.hashCode();
-			return result;
-		}
+	/**
+	 * @param k1 key 1
+	 * @return values that are stored in a map for key 1
+	 */
+	public Collection<V> valuesFor(K1 k1) {
+		return matrix.get(k1).values();
 	}
 
 }

@@ -26,7 +26,7 @@ public class Instance {
 	/**
 	 * Components that need to be placed into network
 	 */
-	private List<Component> components;
+	private Component[] components;
 
 	/**
 	 * Service chains of components
@@ -119,8 +119,8 @@ public class Instance {
 	 * Create a new instance
 	 */
 	private Instance() {
-		components = new ArrayList<>();
-		serviceChains = new LinkedList<>();
+		// everything should be configured from other methods
+		// jbg
 	}
 
 	/**
@@ -244,6 +244,7 @@ public class Instance {
 	 * Configure all components
 	 */
 	private void configureComponents() {
+		components = new Component[numberOfVns];
 
 		// create all components
 		for (int componentIndex = 0; componentIndex < numberOfVns; componentIndex++) {
@@ -255,7 +256,7 @@ public class Instance {
 				}
 				resources.add(res);
 			}
-			components.add(new Component(componentIndex, resources));
+			components[componentIndex] = new Component(componentIndex, resources);
 		}
 
 		for (List<Double> demand : vnfDemands) {
@@ -271,8 +272,8 @@ public class Instance {
 				componentException("Demanded bandwidth can't be negative");
 			}
 
-			Component c1 = components.get(ci1);
-			Component c2 = components.get(ci2);
+			Component c1 = components[ci1];
+			Component c2 = components[ci2];
 
 			c1.setBandwidth(c2, bandwidth);
 			c2.setBandwidth(c1, bandwidth);
@@ -294,7 +295,7 @@ public class Instance {
 				boolean in = chain.get(componentIndex).intValue() == 1;
 
 				if (in) {
-					Component c = components.get(componentIndex);
+					Component c = components[componentIndex];
 					sc.addComponent(c);
 					c.addServiceChain(sc);
 				}
@@ -363,7 +364,7 @@ public class Instance {
 		return network;
 	}
 
-	public List<Component> getComponents() {
+	public Component[] getComponents() {
 		return components;
 	}
 

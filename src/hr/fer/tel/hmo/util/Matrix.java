@@ -1,5 +1,6 @@
 package hr.fer.tel.hmo.util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,15 @@ public class Matrix<K1, K2, V> {
 	 */
 	public V get(K1 k1, K2 k2) {
 		return matrix.get(new KeyPair<>(k1, k2));
+	}
+
+	/**
+	 * Return values stored in this matrix
+	 *
+	 * @return collection of values
+	 */
+	public Collection<V> values() {
+		return matrix.values();
 	}
 
 	/**

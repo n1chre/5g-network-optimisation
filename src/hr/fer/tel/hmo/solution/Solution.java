@@ -1,6 +1,7 @@
 package hr.fer.tel.hmo.solution;
 
-import java.util.List;
+import hr.fer.tel.hmo.util.Matrix;
+
 import java.util.stream.Collectors;
 
 /**
@@ -10,9 +11,9 @@ public class Solution {
 
 	private Placement placement;
 
-	private List<Route> routes;
+	private Matrix<Integer, Integer, Route> routes;
 
-	public Solution(Placement placement, List<Route> routes) {
+	public Solution(Placement placement, Matrix<Integer, Integer, Route> routes) {
 		this.placement = placement;
 		this.routes = routes;
 	}
@@ -21,13 +22,13 @@ public class Solution {
 		return placement;
 	}
 
-	public List<Route> getRoutes() {
+	public Matrix<Integer, Integer, Route> getRoutes() {
 		return routes;
 	}
 
 	@Override
 	public String toString() {
-		String routing = routes.stream()
+		String routing = routes.values().stream()
 				.map(Route::toString)
 				.collect(Collectors.joining(",\n", "routes={\n", "\n};"));
 		return placement + "\n" + routing;

@@ -56,7 +56,6 @@ public class Evaluator {
 	 */
 	public double evaluate(Solution solution) {
 		Placement placement = solution.getPlacement();
-		List<Route> routes = solution.getRoutes();
 
 		double sol = 0.0;
 
@@ -71,7 +70,7 @@ public class Evaluator {
 			sol += network.getServer(serverIndex).getAdditionalPower(c);
 		}
 
-		for (Route r : routes) {
+		for (Route r : solution.getRoutes().values()) {
 			int[] nodes = r.getNodes();
 			if (nodes[0] == nodes[nodes.length - 1]) {
 				// no intermediate nodes
@@ -100,18 +99,10 @@ public class Evaluator {
 		return sol;
 	}
 
-//	/**
-//	 * This is a helper function used for extracting node index.
-//	 * Return index of node that has a server connected which has a component on it.
-//	 *
-//	 * @param p    placement of components
-//	 * @param r    route we want to analyze
-//	 * @param from true if we want to get component that is marked as <code>from</code> in given route
-//	 * @return index of a node
-//	 */
-//	private int extractNodeIndex(Placement p, Route r, boolean from) {
-//		int idx = from ? r.getFrom() : r.getTo();
-//		return network.getServer(p.getPlacementFor(components[idx])).getNode().getIndex();
-//	}
+	private boolean isLatencyValidForServiceChain(Solution solution, ServiceChain sc) {
+		//return solution.getRoutes()
+		return false;
+	}
+
 
 }

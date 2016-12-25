@@ -26,14 +26,46 @@ public class Network {
 	private Map<Node, List<Link>> links;
 
 	/**
-	 * Minimal delay between nodes
+	 * Create a new network with desired number of nodes and servers.
+	 * Network is configured using addNode, addLink and addServer methods
+	 *
+	 * @param numberOfNodes   number of nodes in network
+	 * @param numberOfServers number of servers in network
 	 */
-	private double[][] delay;
-
 	public Network(int numberOfNodes, int numberOfServers) {
 		nodes = new Node[numberOfNodes];
 		servers = new Server[numberOfServers];
 		links = new HashMap<>();
+	}
+
+	/**
+	 * @return number of nodes
+	 */
+	public int getNumberOfNodes() {
+		return nodes.length;
+	}
+
+	/**
+	 * @return number of servers
+	 */
+	public int getNumberOfServers() {
+		return servers.length;
+	}
+
+	/**
+	 * @param index node's index
+	 * @return node with given index
+	 */
+	public Node getNode(int index) {
+		return nodes[index];
+	}
+
+	/**
+	 * @param index server's index
+	 * @return server at given index
+	 */
+	public Server getServer(int index) {
+		return servers[index];
 	}
 
 	/**
@@ -101,7 +133,7 @@ public class Network {
 	 * @param resources   resources that it uses
 	 * @return true if it was added and connected
 	 */
-	public boolean connectServer(int serverIndex, double pmin, double pmax, int nodeIdx, List<Double> resources) {
+	public boolean addServer(int serverIndex, double pmin, double pmax, int nodeIdx, List<Double> resources) {
 		if (serverIndex < 0 || serverIndex >= servers.length) {
 			return false;
 		}

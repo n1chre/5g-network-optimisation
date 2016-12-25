@@ -234,7 +234,7 @@ public class Instance {
 				continue; // no node was found
 			}
 
-			if (!network.connectServer(serverIndex, pmin, pmax, nodeIdx, resources)) {
+			if (!network.addServer(serverIndex, pmin, pmax, nodeIdx, resources)) {
 				networkException("Server configured badly");
 			}
 		}

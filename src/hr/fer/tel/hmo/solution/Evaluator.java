@@ -34,11 +34,6 @@ public class Evaluator {
 		this.serviceChains = serviceChains;
 	}
 
-	public boolean isValid(Placement placement) {
-		// TODO implement this
-		return false;
-	}
-
 	/**
 	 * Evaluates given placement and routing.
 	 * This is done by calculating total power consupmtion:
@@ -95,6 +90,40 @@ public class Evaluator {
 		return sol;
 	}
 
+	/**
+	 * Test if placement of components is valid (look at used resources)
+	 *
+	 * @param placement placement of components onto servers
+	 * @return true if placement is valid
+	 */
+	public boolean isValid(Placement placement) {
+		List<List<Double>> res = new ArrayList<>();
+		int S = network.getNumberOfServers();
+		for (int s = 0; s < S; s++) {
+			res.add(new ArrayList<>(network.getServer(s).getResources()));
+		}
+
+		for (Component c : components) {
+			int s = placement.getPlacementFor(c);
+			List<Double> serverAvailable = res.get(s);
+			int R = serverAvailable.size();
+			for (int r = 0; r < R; r++) {
+				double left = serverAvailable.get(r) - c.getResources().get(r);
+				if (left < 0) {
+					return false;
+				}
+				serverAvailable.set(r, left);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Test if solution is valid
+	 *
+	 * @param s possible solution
+	 * @return true if solution is valid
+	 */
 	public boolean isValid(Solution s) {
 		// TODO make parallel
 		return isLatencyValid(s) && isBandwidthValid(s);

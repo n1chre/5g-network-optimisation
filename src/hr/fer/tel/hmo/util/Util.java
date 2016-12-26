@@ -1,11 +1,16 @@
 package hr.fer.tel.hmo.util;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Class that provides utility methods for all other classes
  */
 public class Util {
+
+	// TODO use System.currentTimeMillis()
+	private static final long seed = 420L;
+	private static final Random RANDOM = new Random(seed);
 
 	private Util() {
 		// can't be created
@@ -47,6 +52,32 @@ public class Util {
 	 */
 	public static boolean checkArray(List<Double> array, int n) {
 		return array != null && array.size() == n;
+	}
+
+	/**
+	 * Return random integer that is bounded by given bound
+	 *
+	 * @param bound integer bound
+	 * @return random integer
+	 */
+	public static int randomInt(int bound) {
+		return RANDOM.nextInt(bound);
+	}
+
+	/**
+	 * @return random double with uniform distribution on [0,1]
+	 */
+	public static double randomDouble() {
+		return RANDOM.nextDouble();
+	}
+
+	/**
+	 * @param lo lower bound
+	 * @param hi higher bound
+	 * @return random double with uniform distribution on [lo,hi]
+	 */
+	public static double randomDouble(double lo, double hi) {
+		return lo + (hi - lo) * Util.randomDouble();
 	}
 
 

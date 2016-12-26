@@ -3,6 +3,7 @@ package hr.fer.tel.hmo.instance;
 import hr.fer.tel.hmo.network.Link;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.network.Node;
+import hr.fer.tel.hmo.network.Topology;
 import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 import hr.fer.tel.hmo.vnf.ServiceChain;
@@ -20,19 +21,9 @@ import java.util.List;
 public class Instance {
 
 	/**
-	 * Network of nodes, servers and links
+	 * Configured topology
 	 */
-	private Network network;
-
-	/**
-	 * Components that need to be placed into network
-	 */
-	private Component[] components;
-
-	/**
-	 * Service chains of components
-	 */
-	private List<ServiceChain> serviceChains;
+	private Topology topology;
 
 	// ==============================================================================
 
@@ -158,8 +149,11 @@ public class Instance {
 			throw new IllegalArgumentException("Instance configuration is not valid");
 		}
 
-		instance.configureNetwork();
-		instance.configureComponents();
+		Network n = instance.configureNetwork();
+		Component[] cs = instance.configureComponents();
+		List<ServiceChain> scs = instance.configureServiceChains(cs);
+
+		instance.topology = new Topology(n, cs, scs);
 
 		return instance;
 	}
@@ -167,8 +161,8 @@ public class Instance {
 	/**
 	 * Configure the whole network
 	 */
-	private void configureNetwork() {
-		network = new Network(numberOfNodes, numberOfServers);
+	private Network configureNetwork() {
+		Network network = new Network(numberOfNodes, numberOfServers);
 
 		// configure nodes
 		int nodeIndex = 0;
@@ -241,14 +235,17 @@ public class Instance {
 				networkException("Server configured badly");
 			}
 		}
+
+		return network;
 	}
 
 	/**
 	 * Configure all components
+	 *
+	 * @return components
 	 */
-	private void configureComponents() {
-		components = new Component[numberOfVns];
-		serviceChains = new LinkedList<>();
+	private Component[] configureComponents() {
+		Component[] components = new Component[numberOfVns];
 
 		// create all components
 		for (int componentIndex = 0; componentIndex < numberOfVns; componentIndex++) {
@@ -283,6 +280,16 @@ public class Instance {
 			c2.setBandwidth(c1, bandwidth);
 		}
 
+		return components;
+	}
+
+	/**
+	 * @param components configured components
+	 * @return service chains
+	 */
+	private List<ServiceChain> configureServiceChains(Component[] components) {
+		List<ServiceChain> serviceChains = new LinkedList<>();
+
 		// configure service chains
 		for (int scIndex = 0; scIndex < numberOfServiceChains; scIndex++) {
 			List<Double> chain = serviceChain.get(scIndex);
@@ -305,6 +312,8 @@ public class Instance {
 				}
 			}
 		}
+
+		return serviceChains;
 	}
 
 	/**
@@ -364,16 +373,8 @@ public class Instance {
 		return true;
 	}
 
-	public Network getNetwork() {
-		return network;
-	}
-
-	public Component[] getComponents() {
-		return components;
-	}
-
-	public List<ServiceChain> getServiceChains() {
-		return serviceChains;
+	public Topology getTopology() {
+		return topology;
 	}
 
 	/**

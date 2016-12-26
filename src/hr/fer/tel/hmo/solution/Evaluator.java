@@ -1,7 +1,8 @@
 package hr.fer.tel.hmo.solution;
 
 import hr.fer.tel.hmo.network.Link;
-import hr.fer.tel.hmo.network.Network;
+import hr.fer.tel.hmo.network.Topology;
+import hr.fer.tel.hmo.solution.placement.Placement;
 import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.vnf.Component;
 import hr.fer.tel.hmo.vnf.ServiceChain;
@@ -14,24 +15,12 @@ import java.util.*;
 public class Evaluator {
 
 	/**
-	 * Network configuration used to evaluate placement and routing
+	 * Network topology
 	 */
-	private Network network;
+	private Topology topology;
 
-	/**
-	 * Components that are placed onto servers
-	 */
-	private Component[] components;
-
-	/**
-	 * List of service chains
-	 */
-	private List<ServiceChain> serviceChains;
-
-	public Evaluator(Network network, Component[] components, List<ServiceChain> serviceChains) {
-		this.network = network;
-		this.components = components;
-		this.serviceChains = serviceChains;
+	public Evaluator(Topology topology) {
+		this.topology = topology;
 	}
 
 	/**
@@ -50,29 +39,29 @@ public class Evaluator {
 
 		double sol = 0.0;
 
-		BitSet usedNodes = new BitSet(network.getNumberOfNodes());
-		BitSet usedServers = new BitSet(network.getNumberOfServers());
+		BitSet usedNodes = new BitSet(topology.getNetwork().getNumberOfNodes());
+		BitSet usedServers = new BitSet(topology.getNetwork().getNumberOfServers());
 		Set<Link> usedLinks = new HashSet<>();
 
-		for (Component c : components) {
+		for (Component c : topology.getComponents()) {
 			int serverIndex = placement.getPlacementFor(c);
 			usedServers.set(serverIndex);
 
-			sol += network.getServer(serverIndex).getAdditionalPower(c);
+			sol += topology.getNetwork().getServer(serverIndex).getAdditionalPower(c);
 		}
 
 		for (Integer from : routes.keys()) {
 			for (Route r : routes.valuesFor(from)) {
 				int[] nodes = r.getNodes();
 				if (nodes.length == 1) {
-					continue; // both components on same node
+					continue; // both topology.getComponents() on same node
 				}
 
 				// mark nodes as used
 				// add used link powers
 				usedNodes.set(nodes[0]);
 				for (int i = 1; i < nodes.length; i++) {
-					usedLinks.add(network.getLink(nodes[i - 1], nodes[i]));
+					usedLinks.add(topology.getNetwork().getLink(nodes[i - 1], nodes[i]));
 					usedNodes.set(nodes[i]);
 				}
 			}
@@ -82,28 +71,28 @@ public class Evaluator {
 		sol += usedLinks.parallelStream().mapToDouble(Link::getPowerConsumption).sum();
 
 		// minimal power used by server (only count those which are on)
-		sol += usedNodes.stream().parallel().mapToDouble(i -> network.getServer(i).getPmin()).sum();
+		sol += usedNodes.stream().parallel().mapToDouble(i -> topology.getNetwork().getServer(i).getPmin()).sum();
 
 		// power used by nodes (only count those which are used)
-		sol += usedNodes.stream().parallel().mapToDouble(i -> network.getNode(i).getPowerConsumption()).sum();
+		sol += usedNodes.stream().parallel().mapToDouble(i -> topology.getNetwork().getNode(i).getPowerConsumption()).sum();
 
 		return sol;
 	}
 
 	/**
-	 * Test if placement of components is valid (look at used resources)
+	 * Test if placement of topology.getComponents() is valid (look at used resources)
 	 *
-	 * @param placement placement of components onto servers
+	 * @param placement placement of topology.getComponents() onto servers
 	 * @return true if placement is valid
 	 */
 	public boolean isValid(Placement placement) {
 		List<List<Double>> res = new ArrayList<>();
-		int S = network.getNumberOfServers();
+		int S = topology.getNetwork().getNumberOfServers();
 		for (int s = 0; s < S; s++) {
-			res.add(new ArrayList<>(network.getServer(s).getResources()));
+			res.add(new ArrayList<>(topology.getNetwork().getServer(s).getResources()));
 		}
 
-		for (Component c : components) {
+		for (Component c : topology.getComponents()) {
 			int s = placement.getPlacementFor(c);
 			List<Double> serverAvailable = res.get(s);
 			int R = serverAvailable.size();
@@ -136,7 +125,7 @@ public class Evaluator {
 	 * @return true if all service chains have valid latency
 	 */
 	private boolean isLatencyValid(Solution s) {
-		return serviceChains.parallelStream().allMatch(sc -> this.isLatencyValidForServiceChain(s, sc));
+		return topology.getServiceChains().parallelStream().allMatch(sc -> this.isLatencyValidForServiceChain(s, sc));
 	}
 
 	/**
@@ -157,7 +146,7 @@ public class Evaluator {
 
 			int[] nodes = r.getNodes();
 			for (int j = 1; j < nodes.length; j++) {
-				lat += network.getLink(nodes[i - 1], nodes[i]).getDelay();
+				lat += topology.getNetwork().getLink(nodes[i - 1], nodes[i]).getDelay();
 			}
 
 			if (lat > sc.getLatency()) {
@@ -179,7 +168,7 @@ public class Evaluator {
 		Matrix<Integer, Integer, Route> routes = solution.getRoutes();
 		Map<Link, Double> bandwidths = new HashMap<>();
 
-		for (ServiceChain sc : serviceChains) {
+		for (ServiceChain sc : topology.getServiceChains()) {
 
 			int n = sc.getNumberOfComponents();
 			if (n == 0) {
@@ -194,7 +183,7 @@ public class Evaluator {
 				int[] nodes = r.getNodes();
 
 				for (int j = 1; j < nodes.length; j++) {
-					Link link = network.getLink(nodes[i - 1], nodes[i]);
+					Link link = topology.getNetwork().getLink(nodes[i - 1], nodes[i]);
 
 					bandwidths.putIfAbsent(link, link.getBandwidth());
 					Double bw = bandwidths.get(link);

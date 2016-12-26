@@ -1,9 +1,9 @@
 package hr.fer.tel.hmo.instance;
 
-import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.network.Link;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.network.Node;
+import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 import hr.fer.tel.hmo.vnf.ServiceChain;
 

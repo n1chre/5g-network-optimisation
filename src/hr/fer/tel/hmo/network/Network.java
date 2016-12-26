@@ -90,7 +90,7 @@ public class Network {
 	}
 
 	/**
-	 * Add a new link between two nodes. Links are considered as bidirectional
+	 * Add a new link between two nodes. Links are considered as unidirectional
 	 *
 	 * @param n1   first node index
 	 * @param n2   second node index
@@ -107,7 +107,7 @@ public class Network {
 		}
 
 		boolean ret = links.put(n1, n2, link) == null;
-		ret &= links.put(n2, n1, link) == null;
+//		ret &= links.put(n2, n1, link) == null;
 
 		return ret;
 	}

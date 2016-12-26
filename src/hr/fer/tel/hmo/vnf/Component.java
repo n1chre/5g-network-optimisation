@@ -58,8 +58,8 @@ public class Component {
 		return resources;
 	}
 
-	public Map<Component, Double> getBandwidth() {
-		return bandwidth;
+	public double getDemandedBandwidthFor(Component other) {
+		return bandwidth.getOrDefault(other, 0.0);
 	}
 
 	@Override

@@ -6,10 +6,7 @@ import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.vnf.Component;
 import hr.fer.tel.hmo.vnf.ServiceChain;
 
-import java.util.BitSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class knows how to evaluate given placement and routing
@@ -38,10 +35,7 @@ public class Evaluator {
 	}
 
 	public boolean isValid(Placement placement) {
-		return false;
-	}
-
-	public boolean isValid(Solution solution) {
+		// TODO implement this
 		return false;
 	}
 
@@ -103,9 +97,103 @@ public class Evaluator {
 		return sol;
 	}
 
+	public boolean isValid(Solution s) {
+		// TODO make parallel
+		return isLatencyValid(s) && isBandwidthValid(s);
+	}
+
+	/**
+	 * Check if all service chains have allowed latency
+	 *
+	 * @param s possible solution
+	 * @return true if all service chains have valid latency
+	 */
+	private boolean isLatencyValid(Solution s) {
+		return serviceChains.parallelStream().allMatch(sc -> this.isLatencyValidForServiceChain(s, sc));
+	}
+
+	/**
+	 * Check latency for service chain
+	 *
+	 * @param solution possible solution
+	 * @param sc       service chain
+	 * @return whether latency is below maximal allowed
+	 */
 	private boolean isLatencyValidForServiceChain(Solution solution, ServiceChain sc) {
-		//return solution.getRoutes()
-		return false;
+		Matrix<Integer, Integer, Route> routes = solution.getRoutes();
+
+		double lat = 0.0;
+
+		int n = sc.getNumberOfComponents();
+		for (int i = 1; i < n; i++) {
+			Route r = routes.get(
+					sc.getComponent(i - 1).getIndex(),
+					sc.getComponent(i).getIndex()
+			);
+			int[] nodes = r.getNodes();
+			if (nodes[0] == nodes[nodes.length - 1]) {
+				// no intermediate nodes = no links
+				// components are on servers that are connected to the same node
+				continue;
+			}
+
+			for (int j = 1; j < nodes.length; j++) {
+				lat += network.getLink(nodes[i - 1], nodes[i]).getDelay();
+			}
+
+			if (lat > sc.getLatency()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check is demanded bandwidth ok
+	 *
+	 * @param solution possible solution
+	 * @return true if bandwidth is ok
+	 */
+	private boolean isBandwidthValid(Solution solution) {
+
+		Matrix<Integer, Integer, Route> routes = solution.getRoutes();
+		Map<Link, Double> bandwidths = new HashMap<>();
+
+		for (ServiceChain sc : serviceChains) {
+
+			int n = sc.getNumberOfComponents();
+			if (n == 0) {
+				continue;
+			}
+			Component previous = sc.getComponent(0);
+
+			for (int i = 1; i < n; i++) {
+				Component current = sc.getComponent(i);
+				Route r = routes.get(previous.getIndex(), current.getIndex());
+
+				int[] nodes = r.getNodes();
+				if (nodes[0] == nodes[nodes.length - 1]) {
+					// no intermediate nodes = no links
+					// components are on servers that are connected to the same node
+					continue;
+				}
+
+				for (int j = 1; j < nodes.length; j++) {
+					Link link = network.getLink(nodes[i - 1], nodes[i]);
+
+					bandwidths.putIfAbsent(link, link.getBandwidth());
+					Double bw = bandwidths.get(link);
+					bw -= previous.getDemandedBandwidthFor(current);
+					if (bw < 0) {
+						return false;
+					}
+					bandwidths.put(link, bw);
+				}
+			}
+		}
+
+		return true;
 	}
 
 

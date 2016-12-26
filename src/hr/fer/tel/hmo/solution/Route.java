@@ -27,6 +27,10 @@ public class Route {
 		this.from = from;
 		this.to = to;
 		this.nodes = nodes;
+		if (nodes.length > 0 && nodes[0] == nodes[nodes.length - 1]) {
+			// they are on the same node
+			nodes = new int[]{nodes[0]};
+		}
 	}
 
 	public int getFrom() {
@@ -67,12 +71,10 @@ public class Route {
 
 	@Override
 	public String toString() {
-		String sNodes = "[" + (nodes[0] + 1) + "]";
-		if (nodes[0] != nodes[nodes.length - 1]) {
-			sNodes = Arrays.stream(nodes)
-					.mapToObj(i -> Integer.toString(i + 1))
-					.collect(Collectors.joining(",", "[", "]"));
-		}
-		return String.format("<%d,%d,%s>", from + 1, to + 1, sNodes);
+		return String.format("<%d,%d,%s>", from + 1, to + 1,
+				Arrays.stream(nodes)
+						.mapToObj(i -> Integer.toString(i + 1))
+						.collect(Collectors.joining(",", "[", "]"))
+		);
 	}
 }

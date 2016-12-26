@@ -69,10 +69,8 @@ public class Evaluator {
 		for (Integer from : routes.keys()) {
 			for (Route r : routes.valuesFor(from)) {
 				int[] nodes = r.getNodes();
-				if (nodes[0] == nodes[nodes.length - 1]) {
-					// no intermediate nodes
-					// components are on servers that are connected to the same node
-					continue;
+				if (nodes.length == 1) {
+					continue; // both components on same node
 				}
 
 				// mark nodes as used
@@ -126,17 +124,9 @@ public class Evaluator {
 
 		int n = sc.getNumberOfComponents();
 		for (int i = 1; i < n; i++) {
-			Route r = routes.get(
-					sc.getComponent(i - 1).getIndex(),
-					sc.getComponent(i).getIndex()
-			);
-			int[] nodes = r.getNodes();
-			if (nodes[0] == nodes[nodes.length - 1]) {
-				// no intermediate nodes = no links
-				// components are on servers that are connected to the same node
-				continue;
-			}
+			Route r = routes.get(sc.getComponent(i - 1).getIndex(), sc.getComponent(i).getIndex());
 
+			int[] nodes = r.getNodes();
 			for (int j = 1; j < nodes.length; j++) {
 				lat += network.getLink(nodes[i - 1], nodes[i]).getDelay();
 			}
@@ -169,15 +159,10 @@ public class Evaluator {
 			Component previous = sc.getComponent(0);
 
 			for (int i = 1; i < n; i++) {
+
 				Component current = sc.getComponent(i);
 				Route r = routes.get(previous.getIndex(), current.getIndex());
-
 				int[] nodes = r.getNodes();
-				if (nodes[0] == nodes[nodes.length - 1]) {
-					// no intermediate nodes = no links
-					// components are on servers that are connected to the same node
-					continue;
-				}
 
 				for (int j = 1; j < nodes.length; j++) {
 					Link link = network.getLink(nodes[i - 1], nodes[i]);

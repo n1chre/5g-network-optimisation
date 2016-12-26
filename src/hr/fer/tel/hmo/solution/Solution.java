@@ -1,5 +1,6 @@
 package hr.fer.tel.hmo.solution;
 
+import hr.fer.tel.hmo.solution.placement.Placement;
 import hr.fer.tel.hmo.util.Matrix;
 
 import java.util.StringJoiner;

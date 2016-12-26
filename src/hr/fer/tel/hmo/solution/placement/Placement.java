@@ -1,8 +1,10 @@
-package hr.fer.tel.hmo.solution;
+package hr.fer.tel.hmo.solution.placement;
 
 import hr.fer.tel.hmo.network.Server;
+import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 
+import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -32,6 +34,24 @@ public class Placement {
 	public Placement(int numberOfComponents, int numberOfServers) {
 		placement = new int[numberOfComponents];
 		this.numberOfServers = numberOfServers;
+	}
+
+	/**
+	 * @return an exact copy of this placement
+	 */
+	public Placement copy() {
+		Placement cp = new Placement(placement.length, numberOfServers);
+		cp.placement = Arrays.copyOf(this.placement, this.placement.length);
+		return cp;
+	}
+
+	/**
+	 * randomize placement
+	 */
+	public void random() {
+		for (int c = 0; c < placement.length; c++) {
+			place(c, Util.randomInt(numberOfServers));
+		}
 	}
 
 	/**

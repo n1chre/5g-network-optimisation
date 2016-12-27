@@ -1,4 +1,4 @@
-package hr.fer.tel.hmo.solution;
+package hr.fer.tel.hmo.solution.routing;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

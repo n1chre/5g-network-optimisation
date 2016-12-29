@@ -1,5 +1,6 @@
 package hr.fer.tel.hmo.util;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -14,6 +15,13 @@ public class Util {
 
 	private Util() {
 		// can't be created
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T[] asArray(Collection<T> col) {
+		T[] arr = (T[]) new Object[col.size()];
+		col.toArray(arr);
+		return arr;
 	}
 
 	/**

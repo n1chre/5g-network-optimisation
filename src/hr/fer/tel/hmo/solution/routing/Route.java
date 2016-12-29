@@ -1,6 +1,7 @@
 package hr.fer.tel.hmo.solution.routing;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -23,13 +24,23 @@ public class Route {
 	 */
 	private int[] nodes;
 
-	public Route(int from, int to, int[] nodes) {
+	public Route(int from, int to, List<Integer> nodes) {
 		this.from = from;
 		this.to = to;
-		this.nodes = nodes;
-		if (nodes.length > 0 && nodes[0] == nodes[nodes.length - 1]) {
+		int n = nodes.size();
+		if (n == 0) {
+			throw new RuntimeException("Can't be 0");
+		}
+
+		if (nodes.get(0).equals(nodes.get(n - 1))) {
 			// they are on the same node
-			this.nodes = new int[]{nodes[0]};
+			this.nodes = new int[]{nodes.get(0)};
+		} else {
+			this.nodes = new int[nodes.size()];
+			int idx = 0;
+			for (Integer i : nodes) {
+				this.nodes[idx++] = i;
+			}
 		}
 	}
 

@@ -172,7 +172,7 @@ public class Evaluator {
 		for (ServiceChain sc : topology.getServiceChains()) {
 
 			int n = sc.getNumberOfComponents();
-			if (n == 0) {
+			if (n <= 1) {
 				continue;
 			}
 			Component previous = sc.getComponent(0);

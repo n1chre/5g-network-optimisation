@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * This class is a wrapper around matrix class.
@@ -59,6 +60,27 @@ public class Matrix<K1, K2, V> {
 	 */
 	public Collection<V> valuesFor(K1 k1) {
 		return matrix.get(k1).values();
+	}
+
+	/**
+	 * Map function over values in matrix.
+	 *
+	 * @param function mapping function
+	 * @param <V2>     type of resulting value
+	 * @return new created matrix
+	 */
+	public <V2> Matrix<K1, K2, V2> map(Function<V, V2> function) {
+		Matrix<K1, K2, V2> ret = new Matrix<>();
+
+		for (Map.Entry<K1, Map<K2, V>> e1 : matrix.entrySet()) {
+			K1 k1 = e1.getKey();
+			Map<K2, V> m = e1.getValue();
+			for (Map.Entry<K2, V> e2 : m.entrySet()) {
+				ret.put(k1, e2.getKey(), function.apply(e2.getValue()));
+			}
+		}
+
+		return ret;
 	}
 
 }

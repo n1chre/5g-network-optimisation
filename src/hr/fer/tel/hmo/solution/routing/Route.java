@@ -29,7 +29,7 @@ public class Route {
 		this.nodes = nodes;
 		if (nodes.length > 0 && nodes[0] == nodes[nodes.length - 1]) {
 			// they are on the same node
-			nodes = new int[]{nodes[0]};
+			this.nodes = new int[]{nodes[0]};
 		}
 	}
 

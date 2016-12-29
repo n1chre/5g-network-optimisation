@@ -4,6 +4,7 @@ import hr.fer.tel.hmo.network.Link;
 import hr.fer.tel.hmo.network.Network;
 import hr.fer.tel.hmo.network.Node;
 import hr.fer.tel.hmo.network.Topology;
+import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 import hr.fer.tel.hmo.vnf.ServiceChain;
@@ -152,8 +153,9 @@ public class Instance {
 		Network n = instance.configureNetwork();
 		Component[] cs = instance.configureComponents();
 		List<ServiceChain> scs = instance.configureServiceChains(cs);
+		Matrix<Integer, Integer, Double> ds = instance.configureDemands();
 
-		instance.topology = new Topology(n, cs, scs);
+		instance.topology = new Topology(n, cs, ds, scs);
 
 		return instance;
 	}
@@ -260,26 +262,6 @@ public class Instance {
 			components[componentIndex] = new Component(componentIndex, resources);
 		}
 
-		for (List<Double> demand : vnfDemands) {
-			int ci1 = demand.get(0).intValue() - 1;
-			int ci2 = demand.get(1).intValue() - 1;
-
-			if (ci1 < 0 || ci1 >= numberOfVns || ci2 < 0 || ci2 >= numberOfVns) {
-				componentException("Component index out of bounds: " + vnfDemands);
-			}
-
-			double bandwidth = demand.get(2);
-			if (bandwidth < 0) {
-				componentException("Demanded bandwidth can't be negative");
-			}
-
-			Component c1 = components[ci1];
-			Component c2 = components[ci2];
-
-			c1.setBandwidth(c2, bandwidth);
-			c2.setBandwidth(c1, bandwidth);
-		}
-
 		return components;
 	}
 
@@ -314,6 +296,28 @@ public class Instance {
 		}
 
 		return serviceChains;
+	}
+
+	private Matrix<Integer, Integer, Double> configureDemands() {
+		Matrix<Integer, Integer, Double> demands = new Matrix<>();
+
+		for (List<Double> demand : vnfDemands) {
+			int ci1 = demand.get(0).intValue() - 1;
+			int ci2 = demand.get(1).intValue() - 1;
+
+			if (ci1 < 0 || ci1 >= numberOfVns || ci2 < 0 || ci2 >= numberOfVns) {
+				componentException("Component index out of bounds: " + vnfDemands);
+			}
+
+			double bandwidth = demand.get(2);
+			if (bandwidth < 0) {
+				componentException("Demanded bandwidth can't be negative");
+			}
+
+			demands.put(ci1, ci2, bandwidth);
+		}
+
+		return demands;
 	}
 
 	/**

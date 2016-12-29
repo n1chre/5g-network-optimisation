@@ -1,5 +1,6 @@
 package hr.fer.tel.hmo.network;
 
+import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.vnf.Component;
 import hr.fer.tel.hmo.vnf.ServiceChain;
 
@@ -25,10 +26,17 @@ public class Topology {
 	 */
 	private List<ServiceChain> serviceChains;
 
-	public Topology(Network network, Component[] components, List<ServiceChain> serviceChains) {
+	/**
+	 * List of demanded bandwidth from one component to another.
+	 */
+	private Matrix<Integer, Integer, Double> demands;
+
+	public Topology(Network network, Component[] components, Matrix<Integer, Integer, Double> demands,
+	                List<ServiceChain> serviceChains) {
 		this.network = network;
 		this.components = components;
 		this.serviceChains = serviceChains;
+		this.demands = demands;
 	}
 
 	public Network getNetwork() {
@@ -41,5 +49,9 @@ public class Topology {
 
 	public List<ServiceChain> getServiceChains() {
 		return serviceChains;
+	}
+
+	public Matrix<Integer, Integer, Double> getDemands() {
+		return demands;
 	}
 }

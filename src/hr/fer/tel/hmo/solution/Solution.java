@@ -4,6 +4,7 @@ import hr.fer.tel.hmo.solution.placement.Placement;
 import hr.fer.tel.hmo.solution.routing.Route;
 import hr.fer.tel.hmo.util.Matrix;
 
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,14 @@ public class Solution {
 	private Placement placement;
 
 	private Matrix<Integer, Integer, Route> routes;
+
+	public Solution(Placement placement, List<Route> routes) {
+		this.placement = placement;
+		this.routes = new Matrix<>();
+		for (Route r : routes) {
+			this.routes.put(r.getFrom(), r.getTo(), r);
+		}
+	}
 
 	public Solution(Placement placement, Matrix<Integer, Integer, Route> routes) {
 		this.placement = placement;

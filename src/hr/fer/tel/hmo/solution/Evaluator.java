@@ -188,7 +188,7 @@ public class Evaluator {
 
 					bandwidths.putIfAbsent(link, link.getBandwidth());
 					Double bw = bandwidths.get(link);
-					bw -= previous.getDemandedBandwidthFor(current);
+					bw -= topology.getDemands().get(previous.getIndex(), current.getIndex());
 					if (bw < 0) {
 						return false;
 					}

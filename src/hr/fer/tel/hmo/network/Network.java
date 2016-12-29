@@ -124,6 +124,15 @@ public class Network {
 	}
 
 	/**
+	 * Returns all links. Indexes are node indexes
+	 *
+	 * @return matrix of links
+	 */
+	public Matrix<Integer, Integer, Link> getLinks() {
+		return links;
+	}
+
+	/**
 	 * Connect new server to this network
 	 *
 	 * @param serverIndex server's index

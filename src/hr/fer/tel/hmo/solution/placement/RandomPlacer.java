@@ -17,7 +17,7 @@ public class RandomPlacer extends Placer {
 	}
 
 	@Override
-	public Collection<Placement> getInitialPlacements(int maxPlacements) {
+	public List<Placement> getInitialPlacements(int maxPlacements) {
 		List<Placement> placements = new LinkedList<>();
 		Placement p = new Placement(topology.getComponents().length, topology.getNetwork().getNumberOfServers());
 

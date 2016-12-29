@@ -3,6 +3,7 @@ package hr.fer.tel.hmo.solution.placement;
 import hr.fer.tel.hmo.network.Topology;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -40,5 +41,5 @@ public abstract class Placer {
 	 * @param maxPlacements upper bound
 	 * @return initial placements
 	 */
-	public abstract Collection<Placement> getInitialPlacements(int maxPlacements);
+	public abstract List<Placement> getInitialPlacements(int maxPlacements);
 }

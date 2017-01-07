@@ -1,9 +1,6 @@
 package hr.fer.tel.hmo.util;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -83,4 +80,14 @@ public class Matrix<K1, K2, V> {
 		return ret;
 	}
 
+	@Override
+	public String toString() {
+		StringJoiner mainJoiner = new StringJoiner("\n\t", "{\n\t", "\n}");
+		for (K1 k1 : keys()) {
+			for (Map.Entry<K2, V> e : getFor(k1).entrySet()) {
+				mainJoiner.add(k1 + " " + e.getKey() + " " + e.getValue());
+			}
+		}
+		return mainJoiner.toString();
+	}
 }

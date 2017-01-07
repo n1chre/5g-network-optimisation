@@ -3,6 +3,7 @@ package hr.fer.tel.hmo.vnf;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represents a service chain of components
@@ -42,5 +43,12 @@ public class ServiceChain implements Iterable<Component> {
 	@Override
 	public Iterator<Component> iterator() {
 		return components.iterator();
+	}
+
+	@Override
+	public String toString() {
+		return components.stream()
+				.map(c -> Integer.toString(c.getIndex() + 1))
+				.collect(Collectors.joining("->"));
 	}
 }

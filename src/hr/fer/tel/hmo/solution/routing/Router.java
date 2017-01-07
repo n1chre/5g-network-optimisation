@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Routes connections over netwrok
+ * Routes connections over network (greedy)
  */
 public class Router {
 

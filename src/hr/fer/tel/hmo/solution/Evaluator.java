@@ -25,6 +25,14 @@ public class Evaluator {
 	}
 
 	/**
+	 * @param solution solution
+	 * @return fitness
+	 */
+	public double fitness(Solution solution) {
+		return -evaluate(solution);
+	}
+
+	/**
 	 * Evaluates given placement and routing.
 	 * This is done by calculating total power consupmtion:
 	 * 1. power used by servers
@@ -72,7 +80,7 @@ public class Evaluator {
 		sol += usedLinks.parallelStream().mapToDouble(Link::getPowerConsumption).sum();
 
 		// minimal power used by server (only count those which are on)
-		sol += usedNodes.stream().parallel().mapToDouble(i -> topology.getNetwork().getServer(i).getPmin()).sum();
+		sol += usedServers.stream().parallel().mapToDouble(i -> topology.getNetwork().getServer(i).getPmin()).sum();
 
 		// power used by nodes (only count those which are used)
 		sol += usedNodes.stream().parallel().mapToDouble(i -> topology.getNetwork().getNode(i).getPowerConsumption()).sum();

@@ -6,28 +6,15 @@ import java.util.Optional;
 /**
  * Basic tabu search implementation.
  */
-public class TabuSearch<S> {
-
-	/**
-	 * Problem we want to solve using tabu search
-	 */
-	private final TabuProblem<S> problem;
-
-	/**
-	 * Create a new tabu search for given problem
-	 *
-	 * @param problem problem
-	 */
-	public TabuSearch(TabuProblem<S> problem) {
-		this.problem = problem;
-	}
+public class TabuSearch {
 
 	/**
 	 * Perform a search and return best found solution
 	 *
+	 * @param problem search will be performed on this problem
 	 * @return best found solution
 	 */
-	public S search() {
+	public static <S> S search(TabuProblem<S> problem) {
 		S curr = problem.initial();
 		S best = curr;
 

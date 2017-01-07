@@ -1,4 +1,4 @@
-package hr.fer.tel.hmo.alg.tabu;
+package hr.fer.tel.hmo.tabu.alg;
 
 import java.util.Collection;
 

@@ -38,20 +38,22 @@ public class Router {
 	public Matrix<Integer, Integer, Route> findRouting(Placement placement) {
 
 		// create cache
+		// cache[component index] = node index (component -> server -> node)
 		Function<Integer, Integer> nodeIdx =
 				cidx -> topology.getNetwork().getServer(
 						placement.getPlacementFor(cidx)
 				).getNode().getIndex();
 
 		int numComps = topology.getComponents().length;
-		int[] compCache = new int[numComps];
+		int[] CACHE = new int[numComps];
 		for (int i = 0; i < numComps; i++) {
-			compCache[i] = nodeIdx.apply(topology.getComponents()[i].getIndex());
+			CACHE[i] = nodeIdx.apply(topology.getComponents()[i].getIndex());
 		}
 
 		Matrix<Integer, Integer, Route> routes = new Matrix<>();
 
 		for (ServiceChain sc : topology.getServiceChains()) {
+
 			int ncs = sc.getNumberOfComponents();
 			if (ncs <= 1) {
 				continue;
@@ -60,15 +62,16 @@ public class Router {
 			double delay = sc.getLatency();
 
 			int prevCompIdx = sc.getComponent(0).getIndex();
-			int prevNodeIdx = compCache[prevCompIdx];
 			for (int i = 1; i < ncs; i++) {
 
 				int currCompIdx = sc.getComponent(i).getIndex();
 				if (null != routes.get(prevCompIdx, currCompIdx)) {
+					prevCompIdx = currCompIdx;
 					continue;
 				}
 
-				int currNodeIdx = compCache[currCompIdx];
+				int prevNodeIdx = CACHE[prevCompIdx];
+				int currNodeIdx = CACHE[currCompIdx];
 				Double bandwidth = topology.getDemands().get(prevCompIdx, currCompIdx);
 				if (bandwidth == null) {
 					bandwidth = 0.0;
@@ -85,7 +88,6 @@ public class Router {
 
 				routes.put(prevCompIdx, currCompIdx, new Route(prevCompIdx, currCompIdx, r));
 				prevCompIdx = currCompIdx;
-				prevNodeIdx = currNodeIdx;
 			}
 		}
 

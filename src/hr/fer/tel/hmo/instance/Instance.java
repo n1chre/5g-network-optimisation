@@ -290,7 +290,6 @@ public class Instance {
 				if (in) {
 					Component c = components[componentIndex];
 					sc.addComponent(c);
-					c.addServiceChain(sc);
 				}
 			}
 		}

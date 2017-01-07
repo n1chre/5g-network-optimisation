@@ -12,8 +12,6 @@ public class Component {
 
 	private List<Double> resources;
 
-	private List<ServiceChain> serviceChains;
-
 	/**
 	 * Create a new component that needs resources
 	 *
@@ -23,16 +21,6 @@ public class Component {
 	public Component(int index, List<Double> resources) {
 		this.index = index;
 		this.resources = resources;
-		this.serviceChains = new LinkedList<>();
-	}
-
-	/**
-	 * Adds service chain to this component which it's a part of.
-	 *
-	 * @param serviceChain service chain to add
-	 */
-	public void addServiceChain(ServiceChain serviceChain) {
-		serviceChains.add(serviceChain);
 	}
 
 	public int getIndex() {

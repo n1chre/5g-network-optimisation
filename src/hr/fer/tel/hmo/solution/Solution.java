@@ -40,12 +40,12 @@ public class Solution {
 
 	@Override
 	public String toString() {
-		StringJoiner routing = new StringJoiner(",\n");
+		StringJoiner routing = new StringJoiner(",\n", "routes={\n", "\n};");
 		for (Integer from : routes.keys()) {
 			routing.add(
 					routes.valuesFor(from).stream()
 							.map(Route::toString)
-							.collect(Collectors.joining(",\n", "routes={\n", "\n};"))
+							.collect(Collectors.joining(",\n"))
 			);
 		}
 		return placement + "\n" + routing;

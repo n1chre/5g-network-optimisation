@@ -2,8 +2,6 @@ package hr.fer.tel.hmo.solution.placement;
 
 import hr.fer.tel.hmo.network.Topology;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -23,23 +21,21 @@ public abstract class Placer {
 	/**
 	 * Static network topology
 	 */
-	protected Topology topology;
+	Topology topology;
 
 	/**
 	 * Function to test if a placement is valid
 	 */
-	protected Function<Placement, Boolean> isValid;
+	Function<Placement, Boolean> isValid;
 
-	protected Placer(Topology topology, Function<Placement, Boolean> isValid) {
+	Placer(Topology topology, Function<Placement, Boolean> isValid) {
 		this.topology = topology;
 		this.isValid = isValid;
 	}
 
 	/**
-	 * Create initial placements, at most maxPlacements of them
-	 *
-	 * @param maxPlacements upper bound
-	 * @return initial placements
+	 * @return next initial placement to use
 	 */
-	public abstract List<Placement> getInitialPlacements(int maxPlacements);
+	public abstract Placement next();
+
 }

@@ -48,10 +48,21 @@ public class Placement {
 	/**
 	 * randomize placement
 	 */
-	public void random() {
+	public void randomize() {
 		for (int c = 0; c < placement.length; c++) {
 			place(c, Util.randomInt(numberOfServers));
 		}
+	}
+
+	/**
+	 * Create a permutation of this placement
+	 *
+	 * @return new permuted placement
+	 */
+	public Placement permute() {
+		Placement p = copy();
+		Util.shuffle(p.placement);
+		return p;
 	}
 
 	/**

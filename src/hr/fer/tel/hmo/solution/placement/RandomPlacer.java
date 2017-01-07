@@ -2,13 +2,10 @@ package hr.fer.tel.hmo.solution.placement;
 
 import hr.fer.tel.hmo.network.Topology;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Function;
 
 /**
- * Tries to create a random placement
+ * Tries to create a randomize placement
  */
 public class RandomPlacer extends Placer {
 
@@ -17,18 +14,16 @@ public class RandomPlacer extends Placer {
 	}
 
 	@Override
-	public List<Placement> getInitialPlacements(int maxPlacements) {
-		List<Placement> placements = new LinkedList<>();
-		Placement p = new Placement(topology.getComponents().length, topology.getNetwork().getNumberOfServers());
+	public Placement next() {
+		Placement p = new Placement(
+				topology.getComponents().length,
+				topology.getNetwork().getNumberOfServers()
+		);
 
-		while (maxPlacements > 0) {
-			p.random();
-			if (isValid.apply(p)) {
-				placements.add(p.copy());
-				maxPlacements--;
-			}
-		}
+		do {
+			p.randomize();
+		} while (isValid.apply(p));
 
-		return placements;
+		return p;
 	}
 }

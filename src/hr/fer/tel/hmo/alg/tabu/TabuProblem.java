@@ -8,20 +8,19 @@ import java.util.Collection;
 public interface TabuProblem<S> {
 
 	/**
-	 * Return initial solution
-	 *
 	 * @return initial solution
 	 */
 	S initial();
 
 	/**
+	 * @param s1 first solution
+	 * @param s2 second solution
+	 *
 	 * @return is s1 better than s2
 	 */
 	boolean isBetter(S s1, S s2);
 
 	/**
-	 * Return neighbors of given current solution
-	 *
 	 * @param curr current solution
 	 * @return neighbors of current solution
 	 */

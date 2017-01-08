@@ -127,9 +127,16 @@ public class Main {
 		}
 
 		void setTimer() {
-			if (currIdx < times.length) {
-				timer.schedule(this, times[currIdx] * 60000);
+			if (currIdx >= times.length) {
+				return;
 			}
+
+			int diff = times[currIdx];
+			if (currIdx > 0) {
+				diff -= times[currIdx - 1];
+			}
+
+			timer.schedule(this, diff * 60000);
 		}
 
 		@Override

@@ -1,6 +1,5 @@
 package hr.fer.tel.hmo.util;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -15,13 +14,6 @@ public class Util {
 
 	private Util() {
 		// can't be created
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> T[] asArray(Collection<T> col) {
-		T[] arr = (T[]) new Object[col.size()];
-		col.toArray(arr);
-		return arr;
 	}
 
 	/**
@@ -99,8 +91,8 @@ public class Util {
 		if (n <= 1) {
 			return;
 		}
-		for (int i = 0; i < n; i++) {
-			swap(arr, i, i + randomInt(n - i));
+		for (int i = n - 1; i > 0; --i) {
+			swap(arr, i, randomInt(i));
 		}
 	}
 
@@ -116,6 +108,5 @@ public class Util {
 		arr[j] ^= arr[i];
 		arr[i] ^= arr[j];
 	}
-
 
 }

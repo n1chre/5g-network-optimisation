@@ -123,7 +123,6 @@ public class Evaluator {
 	 * @return true if solution is valid
 	 */
 	public boolean isValid(Solution s) {
-		// TODO make parallel
 		return isLatencyValid(s) && isBandwidthValid(s);
 	}
 

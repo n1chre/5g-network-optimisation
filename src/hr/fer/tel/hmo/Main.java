@@ -23,12 +23,12 @@ import java.nio.file.Paths;
  */
 public class Main {
 
-	private static final int TABU_RUNS = 42;
+	private static final int TABU_RUNS = 1;
 	private static final Object RS_LOCK = new Object();
 
 	public static void main(String[] args) {
 
-		int x = 0;
+		int x = 1;
 
 		String name = "instance" + (x == 0 ? "_small" : "-bez_43_44") + ".txt";
 		args = new String[]{"/Users/fhrenic/Programming/vnf-placer/" + name};
@@ -82,7 +82,15 @@ public class Main {
 				rts = r.findRouting(p_);
 			} while (rts == null);
 
-			RoutingProblem rp = new RoutingProblem(evaluator, new Solution(p_, rts));
+			Solution s = new Solution(p_, rts);
+
+			if (!evaluator.isValid(s)) {
+				throw new RuntimeException("Not valid");
+			}
+
+			System.err.println("Starting tabu...");
+
+			RoutingProblem rp = new RoutingProblem(evaluator, t, new Solution(p_, rts));
 			RoutingSolution rs = TabuSearch.search(rp);
 			if (rs != null) {
 				synchronized (RS_LOCK) {
@@ -95,6 +103,7 @@ public class Main {
 		}
 
 		System.out.println("Best found = " + -bestRS.getFitness());
+		System.out.println(bestRS.getSolution());
 
 	}
 

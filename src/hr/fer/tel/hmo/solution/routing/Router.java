@@ -92,8 +92,6 @@ public class Router {
 			}
 		}
 
-		System.out.println(neighbors);
-
 		return routes;
 	}
 

@@ -15,8 +15,8 @@ import java.util.stream.IntStream;
 public class Placement {
 
 	/**
-	 * placement[c] = s+1
-	 * For each component index we store server's index+1.
+	 * placement[c] = s
+	 * For each component index we store server's index.
 	 */
 	private int[] placement;
 
@@ -46,7 +46,7 @@ public class Placement {
 	}
 
 	/**
-	 * randomize placement
+	 * Randomize placement
 	 */
 	public void randomize() {
 		for (int c = 0; c < placement.length; c++) {
@@ -55,7 +55,7 @@ public class Placement {
 	}
 
 	/**
-	 * Permutate this placement
+	 * Permute this placement
 	 */
 	public void permute() {
 		Util.shuffle(placement);
@@ -78,7 +78,7 @@ public class Placement {
 	 * @param serverIndex    server's index
 	 */
 	public void place(int componentIndex, int serverIndex) {
-		placement[componentIndex] = serverIndex + 1;
+		placement[componentIndex] = serverIndex;
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class Placement {
 	 * @return server's index
 	 */
 	public int getPlacementFor(int componentIndex) {
-		return placement[componentIndex] - 1;
+		return placement[componentIndex];
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public class Placement {
 		for (final int sIdx : placement) {
 			sj.add(
 					IntStream.range(0, numberOfServers)
-							.mapToObj(i -> i == sIdx - 1 ? "1" : "0")
+							.mapToObj(i -> i == sIdx ? "1" : "0")
 							.collect(Collectors.joining(",", "[", "]"))
 			);
 		}

@@ -66,6 +66,7 @@ public class Router {
 
 				int currCompIdx = sc.getComponent(i).getIndex();
 				if (null != routes.get(prevCompIdx, currCompIdx)) {
+					// if we already found a route between given components
 					prevCompIdx = currCompIdx;
 					continue;
 				}
@@ -90,6 +91,8 @@ public class Router {
 				prevCompIdx = currCompIdx;
 			}
 		}
+
+		System.out.println(neighbors);
 
 		return routes;
 	}
@@ -144,6 +147,7 @@ public class Router {
 		}
 
 		// use that link
+		best.used = true;
 		best.bandwidth -= demandedBandwidth;
 		delay -= best.delay;
 
@@ -211,7 +215,7 @@ public class Router {
 
 		@Override
 		public String toString() {
-			return Integer.toString(to);
+			return Double.toString(bandwidth);
 		}
 	}
 

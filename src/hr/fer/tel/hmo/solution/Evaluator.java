@@ -179,7 +179,8 @@ public class Evaluator {
 	private boolean isBandwidthValid(Solution solution) {
 
 		Matrix<Integer, Integer, Route> routes = solution.getRoutes();
-		Map<Link, Double> bandwidths = new HashMap<>();
+		Matrix<Integer, Integer, Double> bandwidths = new Matrix<>();
+		Matrix<Integer, Integer, Boolean> cmps = new Matrix<>();
 
 		for (ServiceChain sc : topology.getServiceChains()) {
 
@@ -192,21 +193,31 @@ public class Evaluator {
 			for (int i = 1; i < n; i++) {
 
 				int current = sc.getComponent(i).getIndex();
+
+				if (cmps.get(previous, current) != null) {
+					previous = current;
+					continue;
+				}
+				cmps.put(previous, current, true);
+
 				Route r = routes.get(previous, current);
 				int[] nodes = r.getNodes();
 
 				double demand = topology.getDemands().get(previous, current);
 
 				for (int j = 1; j < nodes.length; j++) {
-					Link link = topology.getNetwork().getLink(nodes[j - 1], nodes[j]);
+					int n1idx = nodes[j - 1];
+					int n2idx = nodes[j];
 
-					bandwidths.putIfAbsent(link, link.getBandwidth());
-					Double bw = bandwidths.get(link);
+					Double bw = bandwidths.get(n1idx, n2idx);
+					if (bw == null) {
+						bw = topology.getNetwork().getLink(n1idx, n2idx).getBandwidth();
+					}
 					bw -= demand;
 					if (bw < 0) {
 						return false;
 					}
-					bandwidths.put(link, bw);
+					bandwidths.put(n1idx, n2idx, bw);
 				}
 
 				previous = current;

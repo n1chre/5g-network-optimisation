@@ -55,14 +55,10 @@ public class Placement {
 	}
 
 	/**
-	 * Create a permutation of this placement
-	 *
-	 * @return new permuted placement
+	 * Permutate this placement
 	 */
-	public Placement permute() {
-		Placement p = copy();
-		Util.shuffle(p.placement);
-		return p;
+	public void permute() {
+		Util.shuffle(placement);
 	}
 
 	/**

@@ -3,9 +3,7 @@ package hr.fer.tel.hmo;
 import java.util.Collection;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -13,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * If some task returns an acceptable result, any other computation is discarded.
  * If none of them return an acceptable result, default value is returned.
  */
-public abstract class Parallel<T> extends Observable implements Observer {
+public abstract class Parallel<T> implements Observer {
 
 	/*
 	 * TODO
@@ -65,6 +63,8 @@ public abstract class Parallel<T> extends Observable implements Observer {
 
 	private final ExecutorService executor;
 
+	private CompletableFuture<T> future;
+
 	/**
 	 * Create a new parallel object.
 	 */
@@ -97,13 +97,17 @@ public abstract class Parallel<T> extends Observable implements Observer {
 	 *
 	 * @param callables these will be called in parallel
 	 */
-	public void run(Collection<Callable<T>> callables) {
+	public Future<T> run(Collection<Callable<T>> callables) {
 		if (ai.get() != 0) {
 			throw new RuntimeException("Already running");
 		}
+
 		ai.set(callables.size());
 		callables.parallelStream().map(Task::new).forEach(executor::submit);
 		executor.shutdown();
+
+		future = new CompletableFuture<>();
+		return future;
 	}
 
 	@Override
@@ -114,7 +118,7 @@ public abstract class Parallel<T> extends Observable implements Observer {
 		boolean acceptable = isAcceptable(t);
 		int curr = ai.decrementAndGet();
 		if (!acceptable) {
-			if (curr == 0) {
+			if (curr <= 0) {
 				onFinish(defaultValue());
 			}
 			return;
@@ -130,8 +134,7 @@ public abstract class Parallel<T> extends Observable implements Observer {
 	private void onFinish(T t) {
 		ai.set(0);
 		executor.shutdownNow();
-		setChanged();
-		notifyObservers(t);
+		future.complete(t);
 	}
 
 	/**

@@ -18,7 +18,7 @@ public class RoutingSolution {
 	}
 
 	public boolean isBetterThan(RoutingSolution other) {
-		return fitness < other.fitness;
+		return fitness > other.fitness;
 	}
 
 	public double getFitness() {

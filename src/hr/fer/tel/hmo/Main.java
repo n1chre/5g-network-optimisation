@@ -12,12 +12,15 @@ import hr.fer.tel.hmo.tabu.alg.TabuSearch;
 import hr.fer.tel.hmo.tabu.impl.RoutingProblem;
 import hr.fer.tel.hmo.tabu.impl.RoutingSolution;
 import hr.fer.tel.hmo.util.Matrix;
+import hr.fer.tel.hmo.util.Util;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  */
@@ -25,6 +28,8 @@ public class Main {
 
 	private static final int TABU_RUNS = 1;
 	private static final Object RS_LOCK = new Object();
+
+	private static RoutingSolution bestRS = null;
 
 	public static void main(String[] args) {
 
@@ -68,7 +73,9 @@ public class Main {
 
 		Placer p = Placer.get(t, evaluator::isValid);
 
-		RoutingSolution bestRS = null;
+		Timer timer = new Timer(true);
+		SolutionWriter sw = new SolutionWriter(timer);
+		sw.setTimer();
 
 		System.err.println("Starting tabu runs...");
 		Matrix<Integer, Integer, Route> rts;
@@ -88,7 +95,7 @@ public class Main {
 				throw new RuntimeException("Not valid");
 			}
 
-			System.err.println("Starting tabu...");
+			System.err.printf("\tTabu[%d]...%n", i);
 
 			RoutingProblem rp = new RoutingProblem(evaluator, t, new Solution(p_, rts));
 			RoutingSolution rs = TabuSearch.search(rp);
@@ -106,5 +113,57 @@ public class Main {
 		System.out.println(bestRS.getSolution());
 
 	}
+
+	private static class SolutionWriter extends TimerTask {
+
+		private static int[] times = new int[]{1, 5, 60};
+		private int currIdx;
+
+		private Timer timer;
+
+		SolutionWriter(Timer timer) {
+			currIdx = 0;
+			this.timer = timer;
+		}
+
+		void setTimer() {
+			if (currIdx < times.length) {
+				timer.schedule(this, times[currIdx] * 60000);
+			}
+		}
+
+		@Override
+		public void run() {
+			synchronized (RS_LOCK) {
+				int minute = times[currIdx];
+				int hour = minute / 60;
+				minute %= 60;
+
+				String filename = "res-";
+				if (hour > 0) {
+					filename += hour + "h-";
+				}
+				if (minute > 0) {
+					filename += minute + "m-";
+				}
+				filename += "hrenic.txt";
+
+				if (bestRS != null) {
+					try {
+						Util.toFile(bestRS.getSolution(), filename);
+					} catch (IOException ex) {
+						System.err.println("Error while writing to file");
+						ex.printStackTrace();
+					}
+				} else {
+					System.err.println("No solution found for " + filename);
+				}
+
+				currIdx++;
+				setTimer();
+			}
+		}
+	}
+
 
 }

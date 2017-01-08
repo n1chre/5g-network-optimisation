@@ -25,33 +25,37 @@ public abstract class Parallel<T> extends Observable implements Observer {
 	 * Parallel AND computation of boolean computations.
 	 * If any call produces a false, false is returned and all other calls are stopped.
 	 */
-	public static Parallel<Boolean> PARALLEL_AND = new Parallel<Boolean>() {
-		@Override
-		protected boolean isAcceptable(Boolean b) {
-			return !b;
-		}
+	public static Parallel<Boolean> PARALLEL_AND() {
+		return new Parallel<Boolean>() {
+			@Override
+			protected boolean isAcceptable(Boolean b) {
+				return !b;
+			}
 
-		@Override
-		protected Boolean defaultValue() {
-			return true;
-		}
-	};
+			@Override
+			protected Boolean defaultValue() {
+				return true;
+			}
+		};
+	}
 
 	/**
 	 * Parallel OR computation of boolean computations.
 	 * If any call produces a true, true is returned and all other calls are stopped.
 	 */
-	public static Parallel<Boolean> PARALLEL_OR = new Parallel<Boolean>() {
-		@Override
-		protected boolean isAcceptable(Boolean b) {
-			return b;
-		}
+	public static Parallel<Boolean> PARALLEL_OR() {
+		return new Parallel<Boolean>() {
+			@Override
+			protected boolean isAcceptable(Boolean b) {
+				return b;
+			}
 
-		@Override
-		protected Boolean defaultValue() {
-			return false;
-		}
-	};
+			@Override
+			protected Boolean defaultValue() {
+				return false;
+			}
+		};
+	}
 
 	/**
 	 * Task counter. When it goes down to zero, all tasks have finished

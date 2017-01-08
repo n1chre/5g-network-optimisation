@@ -152,10 +152,15 @@ public class Evaluator {
 		int n = sc.getNumberOfComponents();
 		for (int i = 1; i < n; i++) {
 			Route r = routes.get(sc.getComponent(i - 1).getIndex(), sc.getComponent(i).getIndex());
+			if (r == null) {
+				System.out.println(sc.getComponent(i - 1).getIndex());
+				System.out.println(sc.getComponent(i).getIndex());
+				throw new RuntimeException();
+			}
 
 			int[] nodes = r.getNodes();
 			for (int j = 1; j < nodes.length; j++) {
-				lat += topology.getNetwork().getLink(nodes[i - 1], nodes[i]).getDelay();
+				lat += topology.getNetwork().getLink(nodes[j - 1], nodes[j]).getDelay();
 			}
 
 			if (lat > sc.getLatency()) {
@@ -183,25 +188,29 @@ public class Evaluator {
 			if (n <= 1) {
 				continue;
 			}
-			Component previous = sc.getComponent(0);
+			int previous = sc.getComponent(0).getIndex();
 
 			for (int i = 1; i < n; i++) {
 
-				Component current = sc.getComponent(i);
-				Route r = routes.get(previous.getIndex(), current.getIndex());
+				int current = sc.getComponent(i).getIndex();
+				Route r = routes.get(previous, current);
 				int[] nodes = r.getNodes();
 
+				double demand = topology.getDemands().get(previous, current);
+
 				for (int j = 1; j < nodes.length; j++) {
-					Link link = topology.getNetwork().getLink(nodes[i - 1], nodes[i]);
+					Link link = topology.getNetwork().getLink(nodes[j - 1], nodes[j]);
 
 					bandwidths.putIfAbsent(link, link.getBandwidth());
 					Double bw = bandwidths.get(link);
-					bw -= topology.getDemands().get(previous.getIndex(), current.getIndex());
+					bw -= demand;
 					if (bw < 0) {
 						return false;
 					}
 					bandwidths.put(link, bw);
 				}
+
+				previous = current;
 			}
 		}
 

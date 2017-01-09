@@ -4,8 +4,7 @@ import hr.fer.tel.hmo.network.Server;
 import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 
-import java.util.Arrays;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -61,6 +60,20 @@ public class Placement {
 		Util.shuffle(placement);
 	}
 
+	public List<Placement> neighbors(int x) {
+		List<Placement> neighbors = new LinkedList<>();
+		for (int i = 0; i < placement.length; i++) {
+			if (x == i) {
+				continue;
+			}
+			Placement p = copy();
+			Util.swap(p.placement, i, x);
+			neighbors.add(p);
+		}
+
+		return neighbors;
+	}
+
 	/**
 	 * Place a component on a server
 	 *
@@ -99,6 +112,10 @@ public class Placement {
 	 */
 	public int getPlacementFor(int componentIndex) {
 		return placement[componentIndex];
+	}
+
+	public int getNumberOfComponents(){
+		return placement.length;
 	}
 
 	@Override

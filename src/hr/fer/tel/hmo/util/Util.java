@@ -5,9 +5,7 @@ import hr.fer.tel.hmo.solution.Solution;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Class that provides utility methods for all other classes
@@ -109,7 +107,7 @@ public class Util {
 	 * @param i   position
 	 * @param j   position
 	 */
-	private static void swap(int[] arr, int i, int j) {
+	public static void swap(int[] arr, int i, int j) {
 		arr[i] ^= arr[j];
 		arr[j] ^= arr[i];
 		arr[i] ^= arr[j];

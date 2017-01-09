@@ -22,7 +22,7 @@ public class RandomPlacer extends Placer {
 
 		do {
 			p.randomize();
-		} while (isValid.apply(p));
+		} while (!isValid.apply(p));
 
 		return p;
 	}

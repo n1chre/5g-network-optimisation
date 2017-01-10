@@ -78,8 +78,7 @@ public class Main {
 		Router router = Router.get(t);
 
 		Timer timer = new Timer(true);
-		SolutionWriter sw = new SolutionWriter(timer);
-		sw.setTimer();
+		new SolutionWriter(timer); // FIXME VERY BAD SOLUTION
 
 		System.err.println("Starting tabu runs...");
 
@@ -161,18 +160,16 @@ public class Main {
 		private Timer timer;
 
 		SolutionWriter(Timer timer) {
-			currIdx = 0;
-			this.timer = timer;
+			this(timer, 0);
 		}
 
-		void setTimer() {
-			if (currIdx >= times.length) {
-				return;
-			}
+		private SolutionWriter(Timer timer, int idx) {
+			currIdx = idx;
+			this.timer = timer;
 
-			int diff = times[currIdx];
-			if (currIdx > 0) {
-				diff -= times[currIdx - 1];
+			int diff = times[idx];
+			if (idx > 0) {
+				diff -= times[idx - 1];
 			}
 
 			timer.schedule(this, diff * 60000);
@@ -196,7 +193,7 @@ public class Main {
 
 				if (bestRS != null) {
 					try {
-						Util.toFile(bestRS.getSolution(), filename);
+						Util.toFile(bestRS.getSolution().toString(), filename);
 					} catch (IOException ex) {
 						System.err.println("Error while writing to file");
 						ex.printStackTrace();
@@ -205,8 +202,9 @@ public class Main {
 					System.err.println("No solution found for " + filename);
 				}
 
-				currIdx++;
-				setTimer();
+				if (++currIdx < times.length) {
+					new SolutionWriter(timer, currIdx);
+				}
 			}
 		}
 	}

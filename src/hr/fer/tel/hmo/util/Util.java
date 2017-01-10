@@ -1,11 +1,11 @@
 package hr.fer.tel.hmo.util;
 
-import hr.fer.tel.hmo.solution.Solution;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Class that provides utility methods for all other classes
@@ -114,13 +114,13 @@ public class Util {
 	}
 
 	/**
-	 * Write solution to file
+	 * Write content to file
 	 *
-	 * @param s        solution
+	 * @param content  content
 	 * @param filename filename
 	 */
-	public static void toFile(Solution s, String filename) throws IOException {
-		Files.write(Paths.get("./" + filename), Collections.singletonList(s.toString()));
+	public static void toFile(String content, String filename) throws IOException {
+		Files.write(Paths.get("./" + filename), Collections.singletonList(content));
 	}
 
 }

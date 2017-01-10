@@ -10,7 +10,7 @@ import hr.fer.tel.hmo.util.Matrix;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -21,7 +21,7 @@ public class RoutingProblem implements TabuProblem<RoutingSolution> {
 	/**
 	 * Maximum number of iterations to run
 	 */
-	private static final int MAX_ITERATIONS = 123;
+	private static final int MAX_ITERATIONS = 1234;
 
 	private Evaluator evaluator;
 	private Router router;
@@ -29,16 +29,22 @@ public class RoutingProblem implements TabuProblem<RoutingSolution> {
 	private int iteration;
 	private int maxIterations;
 
+	private Set<RoutingSolution> dontUseFirst;
+	private Set<RoutingSolution> dontUseSecond;
+
 	public RoutingProblem(Evaluator evaluator, Router router, Solution initial) {
 		this(evaluator, router, initial, MAX_ITERATIONS);
 	}
 
-	RoutingProblem(Evaluator evaluator, Router router, Solution initial, int maxIterations) {
+	private RoutingProblem(Evaluator evaluator, Router router, Solution initial, int maxIterations) {
 		this.evaluator = evaluator;
 		this.router = router;
 		this.initial = toRS(initial);
 		this.iteration = 0;
 		this.maxIterations = maxIterations;
+
+		dontUseFirst = new HashSet<>();
+		dontUseSecond = new HashSet<>();
 	}
 
 	@Override
@@ -53,7 +59,7 @@ public class RoutingProblem implements TabuProblem<RoutingSolution> {
 
 	@Override
 	public Collection<RoutingSolution> neighborhood(RoutingSolution curr) {
-		Collection<RoutingSolution> neighbors = new LinkedList<>();
+		Set<RoutingSolution> neighbors = new HashSet<>();
 
 		Placement p = curr.getSolution().getPlacement().copy();
 
@@ -71,6 +77,15 @@ public class RoutingProblem implements TabuProblem<RoutingSolution> {
 				neighbors.add(toRS(s));
 			}
 		}
+
+		// filter neighbors based on tabu list
+		neighbors = neighbors.parallelStream()
+				.filter(rs -> !dontUseFirst.contains(rs))
+				.filter(rs -> !dontUseSecond.contains(rs))
+				.collect(Collectors.toCollection(HashSet::new));
+
+		dontUseSecond = dontUseFirst;
+		dontUseFirst = neighbors;
 
 		return neighbors;
 	}

@@ -8,7 +8,7 @@ import hr.fer.tel.hmo.solution.placement.Placement;
 import hr.fer.tel.hmo.solution.placement.Placer;
 import hr.fer.tel.hmo.solution.routing.Route;
 import hr.fer.tel.hmo.solution.routing.Router;
-import hr.fer.tel.hmo.tabu.alg.TabuSearch;
+import hr.fer.tel.hmo.tabu.alg.Tabu;
 import hr.fer.tel.hmo.tabu.impl.RoutingProblem;
 import hr.fer.tel.hmo.tabu.impl.RoutingSolution;
 import hr.fer.tel.hmo.util.Matrix;
@@ -21,15 +21,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 /**
  */
 public class Main {
 
-	private static final int TABU_RUNS = 1;
+	private static final int TABU_RUNS = 10;
 	private static final Object RS_LOCK = new Object();
 
 	private static RoutingSolution bestRS = null;
@@ -67,40 +65,44 @@ public class Main {
 		}
 		System.err.println("Network configured...");
 
-
 		Topology t = instance.getTopology();
 
-		// Create evalator
+		// Create main solvers
 		Evaluator evaluator = new Evaluator(t);
-		System.err.println("Evaluator created...");
-
 		Placer placer = Placer.get(t, evaluator::isValid);
 		Router router = Router.get(t);
+		System.err.println("Created evaluator, placer and router...");
 
 		Timer timer = new Timer(true);
 		new SolutionWriter(timer); // FIXME VERY BAD SOLUTION
 
 		System.err.println("Starting tabu runs...");
 
-		ExecutorService es = Executors.newCachedThreadPool();
-		Semaphore semaphore = new Semaphore(0);
 		for (int i = 0; i < TABU_RUNS; i++) {
-			es.submit(new Solver(evaluator, router, placer, semaphore));
-		}
-		es.shutdown();
-		try {
-			semaphore.acquire(TABU_RUNS);
-		} catch (InterruptedException ex) {
-			ex.printStackTrace(System.err);
-			System.exit(5);
+			System.err.printf("\tStarting solver[%d]%n", i);
+			new Solver(evaluator, router, placer, null).run();
 		}
 
-		System.out.println("Best found = " + -bestRS.getFitness());
+//		ExecutorService es = Executors.newCachedThreadPool();
+//		Semaphore semaphore = new Semaphore(0);
+//		for (int i = 0; i < TABU_RUNS; i++) {
+//			es.submit(new Solver(evaluator, router, placer, semaphore));
+//		}
+//		es.shutdown();
+//		try {
+//			semaphore.acquire(TABU_RUNS);
+//		} catch (InterruptedException ex) {
+//			ex.printStackTrace(System.err);
+//			System.exit(5);
+//		}
+
 		System.out.println(bestRS.getSolution());
-
+		System.out.println("Best fitness = " + -bestRS.getFitness());
 	}
 
-
+	/**
+	 * Solves one tabu problem
+	 */
 	private static class Solver implements Runnable {
 
 		private Evaluator evaluator;
@@ -135,17 +137,19 @@ public class Main {
 			}
 
 			RoutingProblem rp = new RoutingProblem(evaluator, router, s);
-			RoutingSolution rs = TabuSearch.search(rp);
+			RoutingSolution rs = Tabu.search(rp);
 			if (rs != null) {
 				synchronized (RS_LOCK) {
 					if (bestRS == null || rs.isBetterThan(bestRS)) {
-						System.err.println("Found new best solution!");
 						bestRS = rs;
+						System.err.printf("Found new best solution (%.2f)!%n", -bestRS.getFitness());
 					}
 				}
 			}
 
-			semaphore.release();
+			if (semaphore != null) {
+				semaphore.release();
+			}
 		}
 	}
 
@@ -208,6 +212,4 @@ public class Main {
 			}
 		}
 	}
-
-
 }

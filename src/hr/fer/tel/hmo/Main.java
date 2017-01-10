@@ -21,6 +21,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 /**
  */
@@ -71,44 +74,26 @@ public class Main {
 		Evaluator evaluator = new Evaluator(t);
 		System.err.println("Evaluator created...");
 
-		Placer p = Placer.get(t, evaluator::isValid);
+		Placer placer = Placer.get(t, evaluator::isValid);
+		Router router = Router.get(t);
 
 		Timer timer = new Timer(true);
 		SolutionWriter sw = new SolutionWriter(timer);
 		sw.setTimer();
 
 		System.err.println("Starting tabu runs...");
-		Matrix<Integer, Integer, Route> rts;
+
+		ExecutorService es = Executors.newCachedThreadPool();
+		Semaphore semaphore = new Semaphore(0);
 		for (int i = 0; i < TABU_RUNS; i++) {
-			// TODO parallel
-
-			Placement p_;
-			do {
-				p_ = p.next();
-				rts = new Router(t).findRouting(p_);
-			} while (rts == null);
-
-			if (!evaluator.isValid(p_)) {
-				throw new RuntimeException("kak idiote");
-			}
-
-			Solution s = new Solution(p_, rts);
-			if (!evaluator.isValid(s)) {
-				throw new RuntimeException("Not valid");
-			}
-
-			System.err.printf("\tTabu[%d]...%n", i);
-
-			RoutingProblem rp = new RoutingProblem(evaluator, t, new Solution(p_, rts));
-			RoutingSolution rs = TabuSearch.search(rp);
-			if (rs != null) {
-				synchronized (RS_LOCK) {
-					if (bestRS == null || rs.isBetterThan(bestRS)) {
-						bestRS = rs;
-					}
-				}
-			}
-
+			es.submit(new Solver(evaluator, router, placer, semaphore));
+		}
+		es.shutdown();
+		try {
+			semaphore.acquire(TABU_RUNS);
+		} catch (InterruptedException ex) {
+			ex.printStackTrace(System.err);
+			System.exit(5);
 		}
 
 		System.out.println("Best found = " + -bestRS.getFitness());
@@ -116,6 +101,58 @@ public class Main {
 
 	}
 
+
+	private static class Solver implements Runnable {
+
+		private Evaluator evaluator;
+		private Router router;
+		private Placer placer;
+		private Semaphore semaphore;
+
+		Solver(Evaluator evaluator, Router router, Placer placer, Semaphore semaphore) {
+			this.evaluator = evaluator;
+			this.router = router;
+			this.placer = placer;
+			this.semaphore = semaphore;
+		}
+
+		@Override
+		public void run() {
+
+			Placement p;
+			Matrix<Integer, Integer, Route> rts;
+
+			do {
+				p = placer.next();
+				rts = router.findRouting(p);
+			} while (rts == null);
+			if (!evaluator.isValid(p)) {
+				throw new RuntimeException("Initial placement not valid");
+			}
+
+			Solution s = new Solution(p, rts);
+			if (!evaluator.isValid(s)) {
+				throw new RuntimeException("Not valid");
+			}
+
+			RoutingProblem rp = new RoutingProblem(evaluator, router, s);
+			RoutingSolution rs = TabuSearch.search(rp);
+			if (rs != null) {
+				synchronized (RS_LOCK) {
+					if (bestRS == null || rs.isBetterThan(bestRS)) {
+						System.err.println("Found new best solution!");
+						bestRS = rs;
+					}
+				}
+			}
+
+			semaphore.release();
+		}
+	}
+
+	/**
+	 * Used to write solutions at given times
+	 */
 	private static class SolutionWriter extends TimerTask {
 
 		private static int[] times = new int[]{1, 5, 60};

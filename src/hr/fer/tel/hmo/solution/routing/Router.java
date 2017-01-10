@@ -80,7 +80,7 @@ public class Router {
 
 				List<Integer> r = path(
 						prevNodeIdx, currNodeIdx,
-						bandwidth, delay,
+						delay, bandwidth,
 						new HashSet<>(), new ArrayList<>()
 				);
 				if (r == null) {
@@ -198,7 +198,8 @@ public class Router {
 
 			c = Double.compare(bandwidth, other.bandwidth);
 			if (c != 0) {
-				return c;
+				// use one with greater bandwidth
+				return -c;
 			}
 
 			return Double.compare(power, other.power);
@@ -213,7 +214,7 @@ public class Router {
 
 		@Override
 		public String toString() {
-			return Double.toString(bandwidth);
+			return to + " " + bandwidth;
 		}
 	}
 

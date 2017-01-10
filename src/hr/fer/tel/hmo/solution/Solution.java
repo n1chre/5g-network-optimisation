@@ -39,6 +39,30 @@ public class Solution {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Solution)) {
+			return false;
+		}
+
+		Solution solution = (Solution) o;
+
+		if (placement != null ? !placement.equals(solution.placement) : solution.placement != null) {
+			return false;
+		}
+		return routes != null ? routes.equals(solution.routes) : solution.routes == null;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = placement != null ? placement.hashCode() : 0;
+		result = 31 * result + (routes != null ? routes.hashCode() : 0);
+		return result;
+	}
+
+	@Override
 	public String toString() {
 		StringJoiner routing = new StringJoiner(",\n", "routes={\n", "\n};");
 		for (Integer from : routes.keys()) {

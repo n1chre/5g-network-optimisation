@@ -29,4 +29,35 @@ public class RoutingSolution {
 		return solution;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof RoutingSolution)) {
+			return false;
+		}
+
+		RoutingSolution that = (RoutingSolution) o;
+
+		if (Double.compare(that.fitness, fitness) != 0) {
+			return false;
+		}
+		return solution.equals(that.solution);
+	}
+
+	@Override
+	public int hashCode() {
+		int result;
+		long temp;
+		temp = Double.doubleToLongBits(fitness);
+		result = (int) (temp ^ (temp >>> 32));
+		result = 31 * result + solution.hashCode();
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%.2f", -fitness);
+	}
 }

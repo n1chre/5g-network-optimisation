@@ -24,7 +24,7 @@ public class Route {
 	 */
 	private int[] nodes;
 
-	public Route(int from, int to, List<Integer> nodes) {
+	Route(int from, int to, List<Integer> nodes) {
 		this.from = from;
 		this.to = to;
 		int n = nodes.size();
@@ -70,13 +70,17 @@ public class Route {
 		if (from != route.from) {
 			return false;
 		}
-		return to == route.to;
+		if (to != route.to) {
+			return false;
+		}
+		return Arrays.equals(nodes, route.nodes);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = from;
 		result = 31 * result + to;
+		result = 31 * result + Arrays.hashCode(nodes);
 		return result;
 	}
 

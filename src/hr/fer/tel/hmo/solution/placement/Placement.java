@@ -4,7 +4,10 @@ import hr.fer.tel.hmo.network.Server;
 import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -114,8 +117,32 @@ public class Placement {
 		return placement[componentIndex];
 	}
 
-	public int getNumberOfComponents(){
+	public int getNumberOfComponents() {
 		return placement.length;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Placement)) {
+			return false;
+		}
+
+		Placement placement1 = (Placement) o;
+
+		if (numberOfServers != placement1.numberOfServers) {
+			return false;
+		}
+		return Arrays.equals(placement, placement1.placement);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Arrays.hashCode(placement);
+		result = 31 * result + numberOfServers;
+		return result;
 	}
 
 	@Override

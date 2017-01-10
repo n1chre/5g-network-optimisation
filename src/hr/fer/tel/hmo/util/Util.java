@@ -6,15 +6,14 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Class that provides utility methods for all other classes
  */
 public class Util {
 
-	// TODO use System.currentTimeMillis()
-	private static final long seed = 420L;
-	private static final Random RANDOM = new Random(seed);
+	private static final Random RANDOM = ThreadLocalRandom.current();
 
 	private Util() {
 		// can't be created

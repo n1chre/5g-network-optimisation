@@ -9,6 +9,7 @@ import hr.fer.tel.hmo.solution.placement.Placer;
 import hr.fer.tel.hmo.solution.routing.Route;
 import hr.fer.tel.hmo.solution.routing.Router;
 import hr.fer.tel.hmo.tabu.alg.Tabu;
+import hr.fer.tel.hmo.tabu.alg.TabuProblem;
 import hr.fer.tel.hmo.tabu.impl.RoutingProblem;
 import hr.fer.tel.hmo.tabu.impl.RoutingSolution;
 import hr.fer.tel.hmo.util.Matrix;
@@ -136,8 +137,8 @@ public class Main {
 				throw new RuntimeException("Not valid");
 			}
 
-			RoutingProblem rp = new RoutingProblem(evaluator, router, s);
-			RoutingSolution rs = Tabu.search(rp);
+			TabuProblem<RoutingSolution> tp = new RoutingProblem(evaluator, router, s);
+			RoutingSolution rs = Tabu.search(tp);
 			if (rs != null) {
 				synchronized (RS_LOCK) {
 					if (bestRS == null || rs.isBetterThan(bestRS)) {

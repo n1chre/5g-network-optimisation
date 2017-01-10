@@ -7,10 +7,9 @@ import hr.fer.tel.hmo.solution.routing.Route;
 import hr.fer.tel.hmo.solution.routing.Router;
 import hr.fer.tel.hmo.util.Matrix;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Simple routing problem, doesn't have any tabu elements
@@ -33,8 +32,14 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 		Placement p = curr.getSolution().getPlacement().copy();
 
 		Collection<Placement> nbrs = new HashSet<>();
-		for (int i = 0; i < p.getNumberOfComponents(); i++) {
-			nbrs.addAll(p.neighbors(i)
+
+		int C = p.getNumberOfComponents();
+
+		List<Integer> idxs = IntStream.range(0, C).boxed().collect(Collectors.toList());
+		Collections.shuffle(idxs);
+
+		for (int i = 0; i < C / 5; i++) {
+			nbrs.addAll(p.neighbors(idxs.get(i))
 					.parallelStream().filter(evaluator::isValid)
 					.collect(Collectors.toList()));
 		}
@@ -52,6 +57,16 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 				.filter(rs -> !dontUseFirst.contains(rs))
 				.filter(rs -> !dontUseSecond.contains(rs))
 				.collect(Collectors.toCollection(HashSet::new));
+
+		// add one new random solution
+		Placement rnd = curr.getSolution().getPlacement().copy();
+		do {
+			rnd.randomize();
+		} while (!evaluator.isValid(rnd));
+		Matrix<Integer, Integer, Route> rts = router.findRouting(rnd);
+		if (rts != null) {
+			neighbors.add(toRS(new Solution(rnd, rts)));
+		}
 
 		dontUseSecond = dontUseFirst;
 		dontUseFirst = neighbors;

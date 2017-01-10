@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Semaphore;
 
 /**
  */
@@ -81,21 +80,8 @@ public class Main {
 
 		for (int i = 0; i < TABU_RUNS; i++) {
 			System.err.printf("\tStarting solver[%d]%n", i);
-			new Solver(evaluator, router, placer, null).run();
+			new Solver(evaluator, router, placer).run();
 		}
-
-//		ExecutorService es = Executors.newCachedThreadPool();
-//		Semaphore semaphore = new Semaphore(0);
-//		for (int i = 0; i < TABU_RUNS; i++) {
-//			es.submit(new Solver(evaluator, router, placer, semaphore));
-//		}
-//		es.shutdown();
-//		try {
-//			semaphore.acquire(TABU_RUNS);
-//		} catch (InterruptedException ex) {
-//			ex.printStackTrace(System.err);
-//			System.exit(5);
-//		}
 
 		System.out.println(bestRS.getSolution());
 		System.out.println("Best fitness = " + -bestRS.getFitness());
@@ -109,13 +95,11 @@ public class Main {
 		private Evaluator evaluator;
 		private Router router;
 		private Placer placer;
-		private Semaphore semaphore;
 
-		Solver(Evaluator evaluator, Router router, Placer placer, Semaphore semaphore) {
+		Solver(Evaluator evaluator, Router router, Placer placer) {
 			this.evaluator = evaluator;
 			this.router = router;
 			this.placer = placer;
-			this.semaphore = semaphore;
 		}
 
 		@Override
@@ -146,10 +130,6 @@ public class Main {
 						System.err.printf("Found new best solution (%.2f)!%n", -bestRS.getFitness());
 					}
 				}
-			}
-
-			if (semaphore != null) {
-				semaphore.release();
 			}
 		}
 	}

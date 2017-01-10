@@ -100,6 +100,7 @@ public class GreedyRouter extends Router {
 	 * @param end               end node
 	 * @param delay             maximal delay
 	 * @param demandedBandwidth demanded bandwidth
+	 * @param neighbors         neighbors map
 	 * @param forbidden         forbidden nodes
 	 * @param path              current path
 	 * @return list of nodes or null if route not found

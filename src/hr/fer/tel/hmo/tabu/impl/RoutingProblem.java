@@ -1,6 +1,5 @@
 package hr.fer.tel.hmo.tabu.impl;
 
-import hr.fer.tel.hmo.network.Topology;
 import hr.fer.tel.hmo.solution.Evaluator;
 import hr.fer.tel.hmo.solution.Solution;
 import hr.fer.tel.hmo.solution.placement.Placement;
@@ -24,29 +23,22 @@ public class RoutingProblem implements TabuProblem<RoutingSolution> {
 	 */
 	private static final int MAX_ITERATIONS = 123;
 
-	/**
-	 * Neighborhood size
-	 */
-	private static final int NEIGHBORHOOD_SIZE = 10;
-
 	private Evaluator evaluator;
-	private Topology topology;
+	private Router router;
 	private RoutingSolution initial;
 	private int iteration;
 	private int maxIterations;
-	private int neighborhoodSize;
 
-	public RoutingProblem(Evaluator evaluator, Topology topology, Solution initial) {
-		this(evaluator, topology, initial, MAX_ITERATIONS, NEIGHBORHOOD_SIZE);
+	public RoutingProblem(Evaluator evaluator, Router router, Solution initial) {
+		this(evaluator, router, initial, MAX_ITERATIONS);
 	}
 
-	public RoutingProblem(Evaluator evaluator, Topology topology, Solution initial, int maxIterations, int neighborhoodSize) {
+	RoutingProblem(Evaluator evaluator, Router router, Solution initial, int maxIterations) {
 		this.evaluator = evaluator;
-		this.topology = topology;
+		this.router = router;
 		this.initial = toRS(initial);
 		this.iteration = 0;
 		this.maxIterations = maxIterations;
-		this.neighborhoodSize = neighborhoodSize;
 	}
 
 	@Override
@@ -73,7 +65,7 @@ public class RoutingProblem implements TabuProblem<RoutingSolution> {
 		}
 
 		for (Placement p_ : nbrs) {
-			Matrix<Integer, Integer, Route> rts = new Router(topology).findRouting(p_);
+			Matrix<Integer, Integer, Route> rts = router.findRouting(p_);
 			if (rts != null) {
 				Solution s = new Solution(p_, rts);
 				neighbors.add(toRS(s));

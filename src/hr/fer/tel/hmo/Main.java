@@ -85,12 +85,14 @@ public class Main {
 			Placement p_;
 			do {
 				p_ = p.next();
-				Router r = new Router(t);
-				rts = r.findRouting(p_);
+				rts = new Router(t).findRouting(p_);
 			} while (rts == null);
 
-			Solution s = new Solution(p_, rts);
+			if (!evaluator.isValid(p_)) {
+				throw new RuntimeException("kak idiote");
+			}
 
+			Solution s = new Solution(p_, rts);
 			if (!evaluator.isValid(s)) {
 				throw new RuntimeException("Not valid");
 			}

@@ -10,7 +10,9 @@ import hr.fer.tel.hmo.tabu.alg.TabuProblem;
 import hr.fer.tel.hmo.util.Matrix;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 /**
  * Simple routing problem, doesn't have any tabu elements
@@ -62,21 +64,21 @@ public class RoutingProblem implements TabuProblem<RoutingSolution> {
 		Collection<RoutingSolution> neighbors = new LinkedList<>();
 
 		Placement p = curr.getSolution().getPlacement().copy();
-		do {
 
-			do {
-				p.randomize(); // TODO
-			} while (!evaluator.isValid(p));
+		Collection<Placement> nbrs = new HashSet<>();
+		for (int i = 0; i < p.getNumberOfComponents(); i++) {
+			nbrs.addAll(p.neighbors(i)
+					.parallelStream().filter(evaluator::isValid)
+					.collect(Collectors.toList()));
+		}
 
-			Router router = new Router(topology);
-			Matrix<Integer, Integer, Route> rts = router.findRouting(p);
-			if (rts == null) {
-				continue;
+		for (Placement p_ : nbrs) {
+			Matrix<Integer, Integer, Route> rts = new Router(topology).findRouting(p_);
+			if (rts != null) {
+				Solution s = new Solution(p_, rts);
+				neighbors.add(toRS(s));
 			}
-
-			neighbors.add(toRS(new Solution(p.copy(), rts)));
-
-		} while (neighbors.size() < neighborhoodSize);
+		}
 
 		return neighbors;
 	}

@@ -119,7 +119,7 @@ public class Util {
 	 * @param filename filename
 	 */
 	public static void toFile(String content, String filename) throws IOException {
-		Files.write(Paths.get("./" + filename), Collections.singletonList(content));
+		Files.write(Paths.get(filename), Collections.singletonList(content));
 	}
 
 }

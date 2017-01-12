@@ -60,12 +60,12 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 
 		// add one new random solution
 		Placement rnd = curr.getSolution().getPlacement().copy();
-		do {
-			rnd.randomize();
-		} while (!evaluator.isValid(rnd));
-		Matrix<Integer, Integer, Route> rts = router.findRouting(rnd);
-		if (rts != null) {
-			neighbors.add(toRS(new Solution(rnd, rts)));
+		rnd.randomize();
+		if (evaluator.isValid(rnd)) {
+			Matrix<Integer, Integer, Route> rts = router.findRouting(rnd);
+			if (rts != null) {
+				neighbors.add(toRS(new Solution(rnd, rts)));
+			}
 		}
 
 		dontUseSecond = dontUseFirst;

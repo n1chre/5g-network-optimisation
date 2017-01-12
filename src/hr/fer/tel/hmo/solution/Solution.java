@@ -17,14 +17,6 @@ public class Solution {
 
 	private Matrix<Integer, Integer, Route> routes;
 
-	public Solution(Placement placement, List<Route> routes) {
-		this.placement = placement;
-		this.routes = new Matrix<>();
-		for (Route r : routes) {
-			this.routes.put(r.getFrom(), r.getTo(), r);
-		}
-	}
-
 	public Solution(Placement placement, Matrix<Integer, Integer, Route> routes) {
 		this.placement = placement;
 		this.routes = routes;

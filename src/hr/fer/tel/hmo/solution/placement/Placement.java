@@ -71,6 +71,9 @@ public class Placement {
 			}
 			Placement p = copy();
 			Util.swap(p.placement, i, x);
+			if (Util.randomDouble() < 0.05) {
+				p.permute();
+			}
 			neighbors.add(p);
 		}
 

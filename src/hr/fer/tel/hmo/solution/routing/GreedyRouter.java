@@ -1,6 +1,7 @@
 package hr.fer.tel.hmo.solution.routing;
 
 import hr.fer.tel.hmo.network.Link;
+import hr.fer.tel.hmo.network.Node;
 import hr.fer.tel.hmo.network.Topology;
 import hr.fer.tel.hmo.solution.placement.Placement;
 import hr.fer.tel.hmo.util.Matrix;
@@ -23,14 +24,20 @@ public class GreedyRouter extends Router {
 
 	public Matrix<Integer, Integer, Route> findRouting(Placement placement) {
 
+		int numNodes = topology.getNetwork().getNumberOfNodes();
+		NodeProxy[] nodes = new NodeProxy[numNodes];
+		for (int i = 0; i < numNodes; i++) {
+			nodes[i] = new NodeProxy(topology.getNetwork().getNode(i));
+		}
+
 		// create neighbors
-		Map<Integer, List<LinkProxy>> neighbors = new HashMap<>();
+		Map<NodeProxy, List<LinkProxy>> neighbors = new HashMap<>();
 		Matrix<Integer, Integer, Link> links = topology.getNetwork().getLinks();
 		for (int n1 : links.keys()) {
-			neighbors.put(n1,
+			neighbors.put(nodes[n1],
 					links.getFor(n1).entrySet()
 							.parallelStream()
-							.map(LinkProxy::new)
+							.map(e -> new LinkProxy(nodes[e.getKey()], e.getValue()))
 							.collect(Collectors.toCollection(LinkedList::new)));
 		}
 
@@ -76,7 +83,7 @@ public class GreedyRouter extends Router {
 				}
 
 				List<Integer> r = path(
-						prevNodeIdx, currNodeIdx,
+						nodes[prevNodeIdx], nodes[currNodeIdx],
 						delay, bandwidth, neighbors,
 						new HashSet<>(), new ArrayList<>()
 				);
@@ -105,20 +112,20 @@ public class GreedyRouter extends Router {
 	 * @param path              current path
 	 * @return list of nodes or null if route not found
 	 */
-	private List<Integer> path(int from, int end, double delay, double demandedBandwidth,
-	                           Map<Integer, List<LinkProxy>> neighbors,
+	private List<Integer> path(NodeProxy from, NodeProxy end, double delay, double demandedBandwidth,
+	                           Map<NodeProxy, List<LinkProxy>> neighbors,
 	                           HashSet<Integer> forbidden, List<Integer> path) {
-		path.add(from);
+		path.add(from.node.getIndex());
 
-		if (from == end) {
+		if (from.equals(end)) {
 			return path;
 		}
 
-		forbidden.add(from);
+		forbidden.add(from.node.getIndex());
 
 		LinkProxy best = null;
 		for (LinkProxy lp : neighbors.get(from)) {
-			if (forbidden.contains(lp.to)) {
+			if (forbidden.contains(lp.to.node.getIndex())) {
 				continue;
 			}
 
@@ -153,17 +160,13 @@ public class GreedyRouter extends Router {
 
 	private static class LinkProxy implements Comparable<LinkProxy> {
 
-		int to;
+		NodeProxy to;
 		double delay;
 		double bandwidth;
 		double power;
 		boolean used;
 
-		LinkProxy(Map.Entry<Integer, Link> entry) {
-			this(entry.getKey(), entry.getValue());
-		}
-
-		LinkProxy(int to, Link link) {
+		LinkProxy(NodeProxy to, Link link) {
 			this.to = to;
 			delay = link.getDelay();
 			bandwidth = link.getBandwidth();
@@ -171,37 +174,28 @@ public class GreedyRouter extends Router {
 			used = false;
 		}
 
+		private double powerUp() {
+			double powerUp = 0.0;
+			if (!used) {
+				powerUp += power;
+			}
+			if (!to.used) {
+				powerUp += to.node.getPowerConsumption();
+			}
+			return powerUp;
+		}
+
 		@Override
 		public int compareTo(LinkProxy other) {
-			// better to use the one that is already used
-			if (used != other.used) {
-				return used ? -1 : 1;
+			int c = Double.compare(powerUp(), other.powerUp());
+			if (c != 0) {
+				return c;
 			}
-
-			int c;
-
-			// if neither is used, prioritize power
-			if (!used) {
-				c = Double.compare(power, other.power);
-				if (c != 0) {
-					return c;
-				}
-			}
-
-			// if both are used, try to take the one with smaller delay
-
 			c = Double.compare(delay, other.delay);
 			if (c != 0) {
 				return c;
 			}
-
-			c = Double.compare(bandwidth, other.bandwidth);
-			if (c != 0) {
-				// use one with greater bandwidth
-				return -c;
-			}
-
-			return Double.compare(power, other.power);
+			return -Double.compare(bandwidth, other.bandwidth);
 		}
 
 		LinkProxy better(LinkProxy other) {
@@ -216,4 +210,35 @@ public class GreedyRouter extends Router {
 			return to + " " + bandwidth;
 		}
 	}
+
+	private static class NodeProxy {
+		Node node;
+		boolean used;
+
+		NodeProxy(Node node) {
+			this.node = node;
+			used = false;
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (!(o instanceof NodeProxy)) {
+				return false;
+			}
+
+			NodeProxy nodeProxy = (NodeProxy) o;
+
+			return node.getIndex() == nodeProxy.node.getIndex();
+		}
+
+		@Override
+		public int hashCode() {
+			return node.getIndex();
+		}
+	}
+
 }

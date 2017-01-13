@@ -1,11 +1,12 @@
 package hr.fer.tel.hmo.solution.routing;
 
 import hr.fer.tel.hmo.network.Link;
-import hr.fer.tel.hmo.network.Node;
 import hr.fer.tel.hmo.network.Topology;
 import hr.fer.tel.hmo.solution.placement.Placement;
+import hr.fer.tel.hmo.solution.proxies.LinkProxy;
+import hr.fer.tel.hmo.solution.proxies.NodeProxy;
 import hr.fer.tel.hmo.util.Matrix;
-import hr.fer.tel.hmo.vnf.ServiceChain;
+import hr.fer.tel.hmo.util.Util;
 
 import java.util.*;
 import java.util.function.Function;
@@ -16,6 +17,9 @@ import java.util.stream.Collectors;
  */
 public class GreedyRouter extends Router {
 
+	// delay is always 20
+	private static final double DEFAULT_DELAY = 20.0;
+
 	private Topology topology;
 
 	GreedyRouter(Topology topology) {
@@ -24,6 +28,8 @@ public class GreedyRouter extends Router {
 
 	public Matrix<Integer, Integer, Route> findRouting(Placement placement) {
 
+		final Matrix<Integer, Integer, Route> routes = new Matrix<>();
+
 		int numNodes = topology.getNetwork().getNumberOfNodes();
 		NodeProxy[] nodes = new NodeProxy[numNodes];
 		for (int i = 0; i < numNodes; i++) {
@@ -31,6 +37,7 @@ public class GreedyRouter extends Router {
 		}
 
 		// create neighbors
+		// node -> list of links which go out of it
 		Map<NodeProxy, List<LinkProxy>> neighbors = new HashMap<>();
 		Matrix<Integer, Integer, Link> links = topology.getNetwork().getLinks();
 		for (int n1 : links.keys()) {
@@ -51,51 +58,42 @@ public class GreedyRouter extends Router {
 		int numComps = topology.getComponents().length;
 		int[] CACHE = new int[numComps];
 		for (int i = 0; i < numComps; i++) {
-			CACHE[i] = nodeIdx.apply(topology.getComponents()[i].getIndex());
+			CACHE[i] = nodeIdx.apply(i);
 		}
 
-		Matrix<Integer, Integer, Route> routes = new Matrix<>();
-
-		for (ServiceChain sc : topology.getServiceChains()) {
-
-			int ncs = sc.getNumberOfComponents();
-			if (ncs <= 1) {
-				continue;
-			}
-
-			double delay = sc.getLatency();
-
-			int prevCompIdx = sc.getComponent(0).getIndex();
-			for (int i = 1; i < ncs; i++) {
-
-				int currCompIdx = sc.getComponent(i).getIndex();
-				if (null != routes.get(prevCompIdx, currCompIdx)) {
-					// if we already found a route between given components
-					prevCompIdx = currCompIdx;
-					continue;
-				}
-
-				int prevNodeIdx = CACHE[prevCompIdx];
-				int currNodeIdx = CACHE[currCompIdx];
-				Double bandwidth = topology.getDemands().get(prevCompIdx, currCompIdx);
-				if (bandwidth == null) {
-					bandwidth = 0.0;
-				}
-
-				List<Integer> r = path(
-						nodes[prevNodeIdx], nodes[currNodeIdx],
-						delay, bandwidth, neighbors,
-						new HashSet<>(), new ArrayList<>()
-				);
-				if (r == null) {
-					return null;
-				}
-
-				routes.put(prevCompIdx, currCompIdx, new Route(prevCompIdx, currCompIdx, r));
-				prevCompIdx = currCompIdx;
-			}
+		class tmp {
+			private int cmp1, cmp2;
+			private double bandwidth;
 		}
 
+		List<tmp> tmps = new ArrayList<>();
+		Matrix<Integer, Integer, Double> demands = topology.getDemands();
+		for (int cmp1 : demands.keys()) {
+			for (Map.Entry<Integer, Double> e : demands.getFor(cmp1).entrySet()) {
+				tmp t = new tmp();
+				t.cmp1 = cmp1;
+				t.cmp2 = e.getKey();
+				t.bandwidth = e.getValue();
+				tmps.add(t);
+			}
+		}
+		Collections.shuffle(tmps, Util.RANDOM); //
+
+		for (tmp t : tmps) {
+			int node1 = CACHE[t.cmp1];
+			int node2 = CACHE[t.cmp2];
+
+			List<Integer> r = path(
+					nodes[node1], nodes[node2],
+					DEFAULT_DELAY, t.bandwidth, neighbors,
+					new HashSet<>(), new ArrayList<>()
+			);
+			if (r == null) {
+				return null;
+			}
+
+			routes.put(t.cmp1, t.cmp2, new Route(t.cmp1, t.cmp2, r));
+		}
 		return routes;
 	}
 
@@ -103,16 +101,16 @@ public class GreedyRouter extends Router {
 	/**
 	 * Find a route that goes from one node to other with given demands
 	 *
-	 * @param from              start node
-	 * @param end               end node
-	 * @param delay             maximal delay
-	 * @param demandedBandwidth demanded bandwidth
-	 * @param neighbors         neighbors map
-	 * @param forbidden         forbidden nodes
-	 * @param path              current path
+	 * @param from      start node
+	 * @param end       end node
+	 * @param delay     maximal delay
+	 * @param bandwidth demanded bandwidth
+	 * @param neighbors neighbors map
+	 * @param forbidden forbidden nodes
+	 * @param path      current path
 	 * @return list of nodes or null if route not found
 	 */
-	private List<Integer> path(NodeProxy from, NodeProxy end, double delay, double demandedBandwidth,
+	private List<Integer> path(NodeProxy from, NodeProxy end, double delay, double bandwidth,
 	                           Map<NodeProxy, List<LinkProxy>> neighbors,
 	                           HashSet<Integer> forbidden, List<Integer> path) {
 		path.add(from.node.getIndex());
@@ -123,28 +121,14 @@ public class GreedyRouter extends Router {
 
 		forbidden.add(from.node.getIndex());
 
-		LinkProxy best = null;
-		for (LinkProxy lp : neighbors.get(from)) {
-			if (forbidden.contains(lp.to.node.getIndex())) {
-				continue;
-			}
+		double delay_ = delay;
 
-			if (delay < lp.delay) {
-				continue;
-			}
+		List<LinkProxy> ls = new ArrayList<>(neighbors.get(from));
+		ls.removeIf(l -> forbidden.contains(l.to.node.getIndex()));
+		ls.removeIf(l -> !l.validParams(delay_, bandwidth));
 
-			if (lp.bandwidth < demandedBandwidth) {
-				continue;
-			}
-
-			// if it's a link to ending node, use it
-			if (end == lp.to) {
-				best = lp;
-				break;
-			}
-
-			best = lp.better(best);
-		}
+//		LinkProxy best = oneLevelBest(ls, end);
+		LinkProxy best = twoLevelBest(ls, from, end, neighbors, delay, bandwidth);
 
 		if (best == null) {
 			return null;
@@ -152,93 +136,100 @@ public class GreedyRouter extends Router {
 
 		// use that link
 		best.used = true;
-		best.bandwidth -= demandedBandwidth;
+		best.bandwidth -= bandwidth;
 		delay -= best.delay;
 
-		return path(best.to, end, delay, demandedBandwidth, neighbors, forbidden, path);
+		return path(best.to, end, delay, bandwidth, neighbors, forbidden, path);
 	}
 
-	private static class LinkProxy implements Comparable<LinkProxy> {
-
-		NodeProxy to;
-		double delay;
-		double bandwidth;
-		double power;
-		boolean used;
-
-		LinkProxy(NodeProxy to, Link link) {
-			this.to = to;
-			delay = link.getDelay();
-			bandwidth = link.getBandwidth();
-			power = link.getPowerConsumption();
-			used = false;
-		}
-
-		private double powerUp() {
-			double powerUp = 0.0;
-			if (!used) {
-				powerUp += power;
-			}
-			if (!to.used) {
-				powerUp += to.node.getPowerConsumption();
-			}
-			return powerUp;
-		}
-
-		@Override
-		public int compareTo(LinkProxy other) {
-			int c = Double.compare(powerUp(), other.powerUp());
-			if (c != 0) {
-				return c;
-			}
-			c = Double.compare(delay, other.delay);
-			if (c != 0) {
-				return c;
-			}
-			return -Double.compare(bandwidth, other.bandwidth);
-		}
-
-		LinkProxy better(LinkProxy other) {
-			if (other == null) {
-				return this;
-			}
-			return compareTo(other) <= 0 ? this : other;
-		}
-
-		@Override
-		public String toString() {
-			return to + " " + bandwidth;
-		}
+	/**
+	 * Find best link in a collection.
+	 * Depth = 1
+	 *
+	 * @param links all links
+	 * @param goal  goal node
+	 * @return best link
+	 */
+	private static LinkProxy oneLevelBest(Collection<LinkProxy> links, NodeProxy goal) {
+		return links.stream().min(new LinkProxy.LinkComp(goal)).orElse(null);
 	}
 
-	private static class NodeProxy {
-		Node node;
-		boolean used;
-
-		NodeProxy(Node node) {
-			this.node = node;
-			used = false;
+	/**
+	 * Find a link which is better
+	 * Depth = 2
+	 *
+	 * @param x         first link
+	 * @param y         second link
+	 * @param from      from which node do links go
+	 * @param goal      to which node do we want to go
+	 * @param neighbors maps each node to links that go out of it
+	 * @param delay     delay
+	 * @param bandwidth bandwidth
+	 * @return better link
+	 */
+	private static LinkProxy twoLevelBetter(LinkProxy x, LinkProxy y, NodeProxy from, NodeProxy goal,
+	                                        Map<NodeProxy, List<LinkProxy>> neighbors,
+	                                        double delay, double bandwidth) {
+		if (x == null) {
+			return y;
+		}
+		if (y == null) {
+			return x;
 		}
 
+		boolean goalX = goal.equals(x.to);
+		boolean goalY = goal.equals(y.to);
 
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (!(o instanceof NodeProxy)) {
-				return false;
-			}
-
-			NodeProxy nodeProxy = (NodeProxy) o;
-
-			return node.getIndex() == nodeProxy.node.getIndex();
+		if (goalX && goalY) {
+			return x.compareTo(y) <= 0 ? x : y;
 		}
 
-		@Override
-		public int hashCode() {
-			return node.getIndex();
+		if (goalX != goalY) {
+			return goalX ? x : y;
 		}
+
+		// neither goes to goal
+
+		Function<NodeProxy, Collection<LinkProxy>> nbrs =
+				nodeProxy -> neighbors.get(nodeProxy).stream()
+						.filter(l -> !from.equals(l.to)) // don't go back to the same node
+						.filter(l -> l.validParams(delay, bandwidth))
+						.collect(Collectors.toList());
+
+		LinkProxy bx = oneLevelBest(nbrs.apply(x.to), goal);
+		LinkProxy by = oneLevelBest(nbrs.apply(y.to), goal);
+
+		if (bx == null) {
+			return x;
+		}
+		if (by == null) {
+			return x;
+		}
+
+		return Double.compare(
+				x.powerUp() + bx.powerUp(), y.powerUp() + by.powerUp()
+		) <= 0 ? x : y;
+	}
+
+	/**
+	 * Find best link from given collection
+	 *
+	 * @param links     collection of links
+	 * @param from      from node
+	 * @param goal      goal node
+	 * @param neighbors map from node to outgoing links
+	 * @param delay     delay
+	 * @param bandwidth bandwidth
+	 * @return best link
+	 */
+	private static LinkProxy twoLevelBest(Collection<LinkProxy> links, NodeProxy from, NodeProxy goal,
+	                                      Map<NodeProxy, List<LinkProxy>> neighbors,
+	                                      double delay, double bandwidth) {
+		LinkProxy best = null;
+		for (LinkProxy lp : links) {
+			best = twoLevelBetter(lp, best, from, goal, neighbors, delay, bandwidth);
+		}
+		return best;
 	}
 
 }

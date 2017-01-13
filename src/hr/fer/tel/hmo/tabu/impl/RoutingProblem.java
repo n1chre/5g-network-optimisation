@@ -6,6 +6,7 @@ import hr.fer.tel.hmo.solution.placement.Placement;
 import hr.fer.tel.hmo.solution.routing.Route;
 import hr.fer.tel.hmo.solution.routing.Router;
 import hr.fer.tel.hmo.util.Matrix;
+import hr.fer.tel.hmo.util.Util;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 		int C = p.getNumberOfComponents();
 
 		List<Integer> idxs = IntStream.range(0, C).boxed().collect(Collectors.toList());
-		Collections.shuffle(idxs);
+		Collections.shuffle(idxs, Util.RANDOM);
 
 		for (int i = 0; i < C / 5; i++) {
 			p.neighbors(idxs.get(i))
@@ -60,6 +61,5 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 
 		return neighbors;
 	}
-
 
 }

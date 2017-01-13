@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Class that provides utility methods for all other classes
@@ -13,7 +14,7 @@ import java.util.Random;
 public class Util {
 
 	public static final double EPS = 1e-6;
-	private static final Random RANDOM = new Random(420);//ThreadLocalRandom.current();
+	public static final Random RANDOM = ThreadLocalRandom.current();
 
 	private Util() {
 		// can't be created

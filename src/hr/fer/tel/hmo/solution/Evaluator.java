@@ -5,10 +5,12 @@ import hr.fer.tel.hmo.network.Topology;
 import hr.fer.tel.hmo.solution.placement.Placement;
 import hr.fer.tel.hmo.solution.routing.Route;
 import hr.fer.tel.hmo.util.Matrix;
+import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 import hr.fer.tel.hmo.vnf.ServiceChain;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * This class knows how to evaluate given placement and routing
@@ -30,6 +32,40 @@ public class Evaluator {
 	 */
 	public double fitness(Solution solution) {
 		return -evaluate(solution);
+	}
+
+	/**
+	 * Assert that solution is correct
+	 *
+	 * @param solution
+	 */
+	public void assertSolution(Solution solution) {
+		if (!isValid(solution)) {
+			throw new RuntimeException("solution is not valid");
+		}
+
+		final Placement p = solution.getPlacement();
+
+		Function<Integer, Integer> compToNode =
+				c -> topology.getNetwork().getServer(p.getPlacementFor(c)).getNode().getIndex();
+
+		for (Route r : solution.getRoutes().values()) {
+			int[] nodes = r.getNodes();
+
+			if (nodes[0] != compToNode.apply(r.getFrom())) {
+				throw new RuntimeException("Doesn't start from given node");
+			}
+
+			if (nodes[nodes.length - 1] != compToNode.apply(r.getTo())) {
+				throw new RuntimeException("Doesn't end in given node");
+			}
+
+			for (int i = 1; i < nodes.length; i++) {
+				if (topology.getNetwork().getLink(nodes[i - 1], nodes[i]) == null) {
+					throw new RuntimeException("Nodes arent connected");
+				}
+			}
+		}
 	}
 
 	/**
@@ -107,7 +143,7 @@ public class Evaluator {
 			int R = serverAvailable.size();
 			for (int r = 0; r < R; r++) {
 				double left = serverAvailable.get(r) - c.getResources().get(r);
-				if (left < 0) {
+				if (left < 0 && left < -Util.EPS) {
 					return false;
 				}
 				serverAvailable.set(r, left);
@@ -152,8 +188,6 @@ public class Evaluator {
 		for (int i = 1; i < n; i++) {
 			Route r = routes.get(sc.getComponent(i - 1).getIndex(), sc.getComponent(i).getIndex());
 			if (r == null) {
-				System.out.println(sc.getComponent(i - 1).getIndex());
-				System.out.println(sc.getComponent(i).getIndex());
 				throw new RuntimeException();
 			}
 

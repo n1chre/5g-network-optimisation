@@ -71,9 +71,6 @@ public class Main {
 		Router router = Router.get(t);
 		System.err.println("Created evaluator, placer and router...");
 
-//		Timer timer = new Timer(true);
-//		new SolutionWriter(timer); // FIXME VERY BAD SOLUTION
-
 		System.err.println("Starting tabu runs...");
 
 		for (int i = 0; i < TABU_RUNS; i++) {
@@ -118,13 +115,19 @@ public class Main {
 			}
 
 			Solution s = new Solution(p, rts);
-			if (!evaluator.isValid(s)) {
-				throw new RuntimeException("Not valid");
-			}
+			evaluator.assertSolution(s);
 
 			TabuProblem<RoutingSolution> tp = new RoutingProblem(evaluator, router, s);
 			RoutingSolution rs = Tabu.search(tp);
 			if (rs != null) {
+
+				try {
+					evaluator.assertSolution(rs.getSolution());
+				} catch (RuntimeException ex) {
+					System.out.println(rs.getSolution());
+					System.out.println(ex.getMessage());
+					return;
+				}
 
 				System.err.printf("-> %.2f%n", -rs.getFitness());
 
@@ -133,7 +136,7 @@ public class Main {
 						bestRS = rs;
 						System.err.printf("Found new best solution (%.2f)!%n", -bestRS.getFitness());
 						try {
-							String fname = String.format("/Users/fhrenic/solutions/sol_%d.txt", (int) -rs.getFitness());
+							String fname = String.format("/Users/fhrenic/sols2/sol_%d.txt", (int) -rs.getFitness());
 							Util.toFile(rs.getSolution().toString(), fname);
 						} catch (IOException ex) {
 							ex.printStackTrace();
@@ -142,69 +145,6 @@ public class Main {
 				}
 
 			}
-
-			System.err.println();
-
 		}
 	}
-
-//	/**
-//	 * Used to write solutions at given times
-//	 */
-//	private static class SolutionWriter extends TimerTask {
-//
-//		private static int[] times = new int[]{1, 5, 60};
-//		private int currIdx;
-//
-//		private Timer timer;
-//
-//		SolutionWriter(Timer timer) {
-//			this(timer, 0);
-//		}
-//
-//		private SolutionWriter(Timer timer, int idx) {
-//			currIdx = idx;
-//			this.timer = timer;
-//
-//			int diff = times[idx];
-//			if (idx > 0) {
-//				diff -= times[idx - 1];
-//			}
-//
-//			timer.schedule(this, diff * 60000);
-//		}
-//
-//		@Override
-//		public void run() {
-//			synchronized (RS_LOCK) {
-//				int minute = times[currIdx];
-//				int hour = minute / 60;
-//				minute %= 60;
-//
-//				String filename = "res-";
-//				if (hour > 0) {
-//					filename += hour + "h-";
-//				}
-//				if (minute > 0) {
-//					filename += minute + "m-";
-//				}
-//				filename += "hrenic.txt";
-//
-//				if (bestRS != null) {
-//					try {
-//						Util.toFile(bestRS.getSolution().toString(), filename);
-//					} catch (IOException ex) {
-//						System.err.println("Error while writing to file");
-//						ex.printStackTrace();
-//					}
-//				} else {
-//					System.err.println("No solution found for " + filename);
-//				}
-//
-//				if (++currIdx < times.length) {
-//					new SolutionWriter(timer, currIdx);
-//				}
-//			}
-//		}
-//	}
 }

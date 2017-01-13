@@ -25,7 +25,10 @@ public class Tabu {
 					curr = s;
 				}
 			}
-			if (curr != null && problem.isBetter(curr, best)) {
+			if (curr == null) {
+				break;
+			}
+			if (problem.isBetter(curr, best)) {
 				best = curr;
 			}
 			problem.update(curr, best);

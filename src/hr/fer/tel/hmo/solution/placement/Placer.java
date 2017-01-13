@@ -13,7 +13,8 @@ public abstract class Placer {
 
 	public static Placer get(Topology t, Function<Placement, Boolean> isValid) {
 		if (PLACER == null) {
-			PLACER = new RandomPlacer(t, isValid);
+//			PLACER = new RandomPlacer(t, isValid);
+			PLACER = new GreedyPlacer(t, isValid);
 		}
 		return PLACER;
 	}

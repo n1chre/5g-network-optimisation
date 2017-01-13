@@ -6,14 +6,14 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Class that provides utility methods for all other classes
  */
 public class Util {
 
-	private static final Random RANDOM = ThreadLocalRandom.current();
+	public static final double EPS = 1e-6;
+	private static final Random RANDOM = new Random(420);//ThreadLocalRandom.current();
 
 	private Util() {
 		// can't be created
@@ -81,6 +81,22 @@ public class Util {
 	 */
 	public static double randomDouble(double lo, double hi) {
 		return lo + (hi - lo) * Util.randomDouble();
+	}
+
+	public static <T> void shuffle(T[] arr) {
+		int n = arr.length;
+		if (n <= 1) {
+			return;
+		}
+		for (int i = n - 1; i > 0; --i) {
+			swap(arr, i, randomInt(i));
+		}
+	}
+
+	public static <T> void swap(T[] arr, int i, int j) {
+		T t = arr[i];
+		arr[i] = arr[j];
+		arr[j] = t;
 	}
 
 	/**

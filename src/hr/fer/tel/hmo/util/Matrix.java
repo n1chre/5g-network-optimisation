@@ -59,6 +59,17 @@ public class Matrix<K1, K2, V> {
 		return matrix.get(k1).values();
 	}
 
+	public Collection<V> values() {
+		Collection<V> C = new LinkedList<>();
+
+		for (K1 k1 : keys()) {
+			C.addAll(valuesFor(k1));
+		}
+
+		return C;
+	}
+
+
 	/**
 	 * Map function over values in matrix.
 	 *

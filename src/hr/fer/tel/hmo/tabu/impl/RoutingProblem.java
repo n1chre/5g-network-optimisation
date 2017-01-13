@@ -27,21 +27,21 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 
 	@Override
 	public Collection<RoutingSolution> neighborhood(RoutingSolution curr) {
+
 		Set<RoutingSolution> neighbors = new HashSet<>();
-
-		Placement p = curr.getSolution().getPlacement().copy();
-
 		Collection<Placement> nbrs = new HashSet<>();
 
+		Placement p = curr.getSolution().getPlacement().copy();
 		int C = p.getNumberOfComponents();
 
 		List<Integer> idxs = IntStream.range(0, C).boxed().collect(Collectors.toList());
 		Collections.shuffle(idxs);
 
 		for (int i = 0; i < C / 5; i++) {
-			nbrs.addAll(p.neighbors(idxs.get(i))
-					.parallelStream().filter(evaluator::isValid)
-					.collect(Collectors.toList()));
+			p.neighbors(idxs.get(i))
+					.stream()
+					.filter(evaluator::isValid)
+					.forEach(nbrs::add);
 		}
 
 		for (Placement p_ : nbrs) {
@@ -53,20 +53,7 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 		}
 
 		// filter neighbors based on tabu list
-		neighbors = neighbors.parallelStream()
-				.filter(rs -> !dontUseFirst.contains(rs))
-				.filter(rs -> !dontUseSecond.contains(rs))
-				.collect(Collectors.toCollection(HashSet::new));
-
-		// add one new random solution
-		Placement rnd = curr.getSolution().getPlacement().copy();
-		rnd.randomize();
-		if (evaluator.isValid(rnd)) {
-			Matrix<Integer, Integer, Route> rts = router.findRouting(rnd);
-			if (rts != null) {
-				neighbors.add(toRS(new Solution(rnd, rts)));
-			}
-		}
+		neighbors.removeIf(rs -> dontUseFirst.contains(rs) || dontUseSecond.contains(rs));
 
 		dontUseSecond = dontUseFirst;
 		dontUseFirst = neighbors;

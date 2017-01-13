@@ -64,6 +64,6 @@ public class Solution {
 							.collect(Collectors.joining(",\n"))
 			);
 		}
-		return placement + "\n" + routing;
+		return placement + "\n\n" + routing;
 	}
 }

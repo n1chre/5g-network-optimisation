@@ -26,7 +26,7 @@ public class LinkProxy implements Comparable<LinkProxy> {
 	}
 
 	/**
-	 * Check if we delay and bandwidth constraints are satisfied with this link
+	 * Check if delay and bandwidth constraints are satisfied with this link
 	 *
 	 * @param delay     delay
 	 * @param bandwidth bandwidth

@@ -83,6 +83,13 @@ public class GreedyRouter extends Router {
 			int node1 = CACHE[t.cmp1];
 			int node2 = CACHE[t.cmp2];
 
+			if (node1 == node2) {
+				routes.put(t.cmp1, t.cmp2, new Route(t.cmp1, t.cmp2, Collections.singletonList(node1)));
+				continue;
+			}
+
+			nodes[node2].used = true;
+
 			List<Integer> r = path(
 					nodes[node1], nodes[node2],
 					DEFAULT_DELAY, t.bandwidth, neighbors,
@@ -119,6 +126,7 @@ public class GreedyRouter extends Router {
 			return path;
 		}
 
+		from.used = true;
 		forbidden.add(from.node.getIndex());
 
 		double delay_ = delay;
@@ -200,7 +208,7 @@ public class GreedyRouter extends Router {
 		LinkProxy by = oneLevelBest(nbrs.apply(y.to), goal);
 
 		if (bx == null) {
-			return x;
+			return y;
 		}
 		if (by == null) {
 			return x;

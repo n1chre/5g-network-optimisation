@@ -77,7 +77,7 @@ public class GreedyRouter extends Router {
 				tmps.add(t);
 			}
 		}
-		Collections.shuffle(tmps, Util.RANDOM); //
+		Collections.shuffle(tmps, Util.RANDOM);
 
 		for (tmp t : tmps) {
 			int node1 = CACHE[t.cmp1];
@@ -127,8 +127,8 @@ public class GreedyRouter extends Router {
 		ls.removeIf(l -> forbidden.contains(l.to.node.getIndex()));
 		ls.removeIf(l -> !l.validParams(delay_, bandwidth));
 
-//		LinkProxy best = oneLevelBest(ls, end);
-		LinkProxy best = twoLevelBest(ls, from, end, neighbors, delay, bandwidth);
+		LinkProxy best = oneLevelBest(ls, end);
+//		LinkProxy best = twoLevelBest(ls, from, end, neighbors, delay, bandwidth);
 
 		if (best == null) {
 			return null;

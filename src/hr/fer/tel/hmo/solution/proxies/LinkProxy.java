@@ -2,13 +2,14 @@ package hr.fer.tel.hmo.solution.proxies;
 
 
 import hr.fer.tel.hmo.network.Link;
+import hr.fer.tel.hmo.util.Util;
 
 import java.util.Comparator;
 
 /**
  * Proxy class for link
  */
-public class LinkProxy implements Comparable<LinkProxy>{
+public class LinkProxy implements Comparable<LinkProxy> {
 
 	public NodeProxy to;
 	public double delay;

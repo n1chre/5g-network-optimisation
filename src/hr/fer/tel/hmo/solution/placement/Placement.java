@@ -50,7 +50,7 @@ public class Placement {
 	/**
 	 * Randomize placement
 	 */
-	public void randomize() {
+	void randomize() {
 		for (int c = 0; c < placement.length; c++) {
 			place(c, Util.randomInt(numberOfServers));
 		}
@@ -70,9 +70,10 @@ public class Placement {
 				continue;
 			}
 			Placement p = copy();
-			Util.swap(p.placement, i, x);
-			if (Util.randomDouble() < 0.05) {
+			if (Util.randomDouble() < 0.2) {
 				p.permute();
+			} else {
+				Util.swap(p.placement, i, x);
 			}
 			neighbors.add(p);
 		}

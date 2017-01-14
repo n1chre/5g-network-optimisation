@@ -8,7 +8,10 @@ import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Place all components onto servers in a greedy way (minimum power)
@@ -49,19 +52,36 @@ public class GreedyPlacer extends Placer {
 			ServerProxy sp = null;
 			double power = Double.MAX_VALUE;
 
-			for (ServerProxy sp_ : sps) {
-				if (!sp_.canGo(c)) {
-					continue;
-				}
-				double pow = sp_.powerUp(c);
+			List<ServerProxy> sps_ = Arrays.stream(sps)
+					.filter(s -> s.canGo(c))
+					.sorted(Comparator.comparing(s -> s.powerUp(c)))
+					.collect(Collectors.toList());
 
-				if (pow < power) {
-					power = pow;
-					sp = sp_;
-				}
+			double rnd = Util.randomDouble();
+			if (rnd > 0.5 || sps_.size() == 1) {
+				sp = sps_.get(0);
+			} else if (rnd > 0.2 || sps_.size() == 2) {
+				sp = sps_.get(1);
+			} else if (rnd > 0.05 || sps_.size() == 3) {
+				sp = sps_.get(2);
+			} else {
+				sp = sps_.get(3);
 			}
+//
+//			for (ServerProxy sp_ : sps) {
+//				if (!sp_.canGo(c)) {
+//					continue;
+//				}
+//				double pow = sp_.powerUp(c);
+//
+//				if (pow < power) {
+//					power = pow;
+//					sp = sp_;
+//				}
+//			}
 
 			if (sp == null) {
+				System.out.println("idiote");
 				// lolz
 				return next();
 			}

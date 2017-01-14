@@ -129,11 +129,9 @@ public class GreedyRouter extends Router {
 		from.used = true;
 		forbidden.add(from.node.getIndex());
 
-		double delay_ = delay;
-
 		List<LinkProxy> ls = new ArrayList<>(neighbors.get(from));
 		ls.removeIf(l -> forbidden.contains(l.to.node.getIndex()));
-		ls.removeIf(l -> !l.validParams(delay_, bandwidth));
+		ls.removeIf(l -> !l.validParams(delay, bandwidth));
 
 		LinkProxy best = oneLevelBest(ls, end);
 //		LinkProxy best = twoLevelBest(ls, from, end, neighbors, delay, bandwidth);
@@ -145,9 +143,8 @@ public class GreedyRouter extends Router {
 		// use that link
 		best.used = true;
 		best.bandwidth -= bandwidth;
-		delay -= best.delay;
 
-		return path(best.to, end, delay, bandwidth, neighbors, forbidden, path);
+		return path(best.to, end, delay - best.delay, bandwidth, neighbors, forbidden, path);
 	}
 
 	/**
@@ -158,7 +155,7 @@ public class GreedyRouter extends Router {
 	 * @param goal  goal node
 	 * @return best link
 	 */
-	private static LinkProxy oneLevelBest(Collection<LinkProxy> links, NodeProxy goal) {
+	private static LinkProxy oneLevelBest(List<LinkProxy> links, NodeProxy goal) {
 		return links.stream().min(new LinkProxy.LinkComp(goal)).orElse(null);
 	}
 
@@ -198,7 +195,7 @@ public class GreedyRouter extends Router {
 
 		// neither goes to goal
 
-		Function<NodeProxy, Collection<LinkProxy>> nbrs =
+		Function<NodeProxy, List<LinkProxy>> nbrs =
 				nodeProxy -> neighbors.get(nodeProxy).stream()
 						.filter(l -> !from.equals(l.to)) // don't go back to the same node
 						.filter(l -> l.validParams(delay, bandwidth))
@@ -230,7 +227,7 @@ public class GreedyRouter extends Router {
 	 * @param bandwidth bandwidth
 	 * @return best link
 	 */
-	private static LinkProxy twoLevelBest(Collection<LinkProxy> links, NodeProxy from, NodeProxy goal,
+	private static LinkProxy twoLevelBest(List<LinkProxy> links, NodeProxy from, NodeProxy goal,
 	                                      Map<NodeProxy, List<LinkProxy>> neighbors,
 	                                      double delay, double bandwidth) {
 		LinkProxy best = null;

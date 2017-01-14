@@ -8,9 +8,10 @@ import hr.fer.tel.hmo.solution.routing.Router;
 import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.util.Util;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Simple routing problem, doesn't have any tabu elements
@@ -37,13 +38,13 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 		Placement p = curr.getSolution().getPlacement().copy();
 		int C = p.getNumberOfComponents();
 
-		List<Integer> idxs = IntStream.range(0, C).boxed().collect(Collectors.toList());
-		Collections.shuffle(idxs, Util.RANDOM);
+		p.neighborsMore(5).stream().filter(evaluator::isValid).forEach(nbrs::add);
 
-		for (int i = 0; i < C / 5; i++) {
-			p.neighbors(idxs.get(i)).stream()
-					.filter(evaluator::isValid)
-					.forEach(nbrs::add);
+		if (nbrs.isEmpty()) {
+//			Arrays.stream(Util.rndIndexes(C, C / 5))
+//					.forEach(i -> p.neighbors(i).stream()
+//							.filter(evaluator::isValid)
+//							.forEach(nbrs::add));
 		}
 
 		for (Placement p_ : nbrs) {
@@ -56,6 +57,10 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 				}
 				neighbors.add(rs);
 			}
+		}
+
+		if (neighbors.isEmpty()) {
+
 		}
 
 		dontUseThird = dontUseSecond;

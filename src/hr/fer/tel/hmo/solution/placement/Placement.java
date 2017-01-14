@@ -81,6 +81,26 @@ public class Placement {
 		return neighbors;
 	}
 
+	public List<Placement> neighborsMore(int n) {
+		List<Placement> lst = new LinkedList<>();
+
+
+
+		int NS = 50;
+		while (NS-- > 0) {
+
+			int[] indexes = Util.rndIndexes(placement.length, n);
+
+			Placement p = copy();
+
+			for (int i = n - 1; i > 0; --i) {
+				Util.swap(p.placement, indexes[i], indexes[Util.randomInt(i)]);
+			}
+			lst.add(p);
+		}
+		return lst;
+	}
+
 	/**
 	 * Place a component on a server
 	 *

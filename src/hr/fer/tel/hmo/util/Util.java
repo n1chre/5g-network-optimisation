@@ -3,6 +3,7 @@ package hr.fer.tel.hmo.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -18,6 +19,15 @@ public class Util {
 
 	private Util() {
 		// can't be created
+	}
+
+	public static int[] rndIndexes(int n, int c) {
+		int[] indexes = new int[n];
+		for (int i = 0; i < n; i++) {
+			indexes[i] = i;
+		}
+		shuffle(indexes);
+		return Arrays.copyOf(indexes, c);
 	}
 
 	/**

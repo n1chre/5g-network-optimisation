@@ -25,7 +25,7 @@ import java.nio.file.Paths;
  */
 public class Main {
 
-	private static final int TABU_RUNS = 420;
+	private static final int TABU_RUNS = 420000;
 	private static final Object RS_LOCK = new Object();
 
 	private static RoutingSolution bestRS = null;

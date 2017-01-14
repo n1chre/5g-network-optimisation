@@ -84,12 +84,10 @@ public class Placement {
 	public List<Placement> neighborsMore(int n) {
 		List<Placement> lst = new LinkedList<>();
 
-
+		int[] indexes = Util.rndIndexes(placement.length, n);
 
 		int NS = 50;
 		while (NS-- > 0) {
-
-			int[] indexes = Util.rndIndexes(placement.length, n);
 
 			Placement p = copy();
 

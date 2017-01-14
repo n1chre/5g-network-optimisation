@@ -6,9 +6,7 @@ import hr.fer.tel.hmo.solution.placement.Placement;
 import hr.fer.tel.hmo.solution.routing.Route;
 import hr.fer.tel.hmo.solution.routing.Router;
 import hr.fer.tel.hmo.util.Matrix;
-import hr.fer.tel.hmo.util.Util;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,13 +38,6 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 
 		p.neighborsMore(5).stream().filter(evaluator::isValid).forEach(nbrs::add);
 
-		if (nbrs.isEmpty()) {
-//			Arrays.stream(Util.rndIndexes(C, C / 5))
-//					.forEach(i -> p.neighbors(i).stream()
-//							.filter(evaluator::isValid)
-//							.forEach(nbrs::add));
-		}
-
 		for (Placement p_ : nbrs) {
 			Matrix<Integer, Integer, Route> rts = router.findRouting(p_);
 			if (rts != null) {
@@ -57,10 +48,6 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 				}
 				neighbors.add(rs);
 			}
-		}
-
-		if (neighbors.isEmpty()) {
-
 		}
 
 		dontUseThird = dontUseSecond;

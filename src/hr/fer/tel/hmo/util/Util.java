@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 /**
@@ -13,7 +12,7 @@ import java.util.function.Function;
 public class Util {
 
 	public static final double EPS = 1e-6;
-	public static final Random RANDOM = ThreadLocalRandom.current();
+	public static final Random RANDOM = new Random(420);//ThreadLocalRandom.current();
 
 	private Util() {
 		// can't be created
@@ -24,18 +23,27 @@ public class Util {
 			Function<T, Double> probability,
 			Function<T, R> extractor
 	) {
+		if (ts.isEmpty()) {
+			return null;
+		}
 
 		double p = Util.randomDouble();
 		double P = 0.0;
 
 		for (T t : ts) {
-			P += probability.apply(t);
+
+			double p_ = probability.apply(t);
+			if (p_ < 0.0 || p_ > 1.0 || Double.isNaN(P) || Double.isInfinite(P)) {
+				throw new RuntimeException("Probability for " + t + " not in [0,1] range");
+			}
+			P += p_;
+
 			if (p <= P) {
 				return extractor.apply(t);
 			}
 		}
 
-		return null;
+		throw new RuntimeException("Can't happen");
 	}
 
 	public static int[] rndIndexes(int n, int c) {

@@ -13,7 +13,8 @@ public abstract class Router {
 
 	public static Router get(Topology t) {
 		if (ROUTER == null) {
-			ROUTER = new GreedyRouter(t);
+//			ROUTER = new GreedyRouter(t);
+			ROUTER = new AntColonyRouter(t);
 		}
 		return ROUTER;
 	}

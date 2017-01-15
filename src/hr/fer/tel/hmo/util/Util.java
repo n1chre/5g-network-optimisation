@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 /**
@@ -12,7 +13,7 @@ import java.util.function.Function;
 public class Util {
 
 	public static final double EPS = 1e-6;
-	public static final Random RANDOM = new Random(420);//ThreadLocalRandom.current();
+	public static final Random RANDOM = ThreadLocalRandom.current();
 
 	private Util() {
 		// can't be created

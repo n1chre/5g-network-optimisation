@@ -3,11 +3,9 @@ package hr.fer.tel.hmo.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 /**
  * Class that provides utility methods for all other classes
@@ -19,6 +17,25 @@ public class Util {
 
 	private Util() {
 		// can't be created
+	}
+
+	public static <T, R> R roulette(
+			Collection<T> ts,
+			Function<T, Double> probability,
+			Function<T, R> extractor
+	) {
+
+		double p = Util.randomDouble();
+		double P = 0.0;
+
+		for (T t : ts) {
+			P += probability.apply(t);
+			if (p <= P) {
+				return extractor.apply(t);
+			}
+		}
+
+		return null;
 	}
 
 	public static int[] rndIndexes(int n, int c) {

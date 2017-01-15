@@ -4,6 +4,7 @@ package hr.fer.tel.hmo.solution.proxies;
 import hr.fer.tel.hmo.network.Link;
 
 import java.util.Comparator;
+import java.util.HashSet;
 
 /**
  * Proxy class for link
@@ -46,6 +47,17 @@ public class LinkProxy implements Comparable<LinkProxy> {
 			power += this.power;
 		}
 		if (!to.used) {
+			power += to.node.getPowerConsumption();
+		}
+		return power;
+	}
+
+	public double powerUp(HashSet<NodeProxy> nps, HashSet<LinkProxy> lps) {
+		double power = 0.0;
+		if (!used && !lps.contains(this)) {
+			power += this.power;
+		}
+		if (!to.used && !nps.contains(to)) {
 			power += to.node.getPowerConsumption();
 		}
 		return power;

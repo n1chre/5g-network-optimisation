@@ -38,7 +38,7 @@ public class Matrix<K1, K2, V> {
 
 	/**
 	 * @param k1 key 1
-	 * @return map that is used for that key
+	 * @return mapTo that is used for that key
 	 */
 	public Map<K2, V> getFor(K1 k1) {
 		return matrix.get(k1);
@@ -53,7 +53,7 @@ public class Matrix<K1, K2, V> {
 
 	/**
 	 * @param k1 key 1
-	 * @return values that are stored in a map for key 1
+	 * @return values that are stored in a mapTo for key 1
 	 */
 	public Collection<V> valuesFor(K1 k1) {
 		return matrix.get(k1).values();
@@ -77,7 +77,7 @@ public class Matrix<K1, K2, V> {
 	 * @param <V2>     type of resulting value
 	 * @return new created matrix
 	 */
-	public <V2> Matrix<K1, K2, V2> map(Function<V, V2> function) {
+	public <V2> Matrix<K1, K2, V2> mapTo(Function<V, V2> function) {
 		Matrix<K1, K2, V2> ret = new Matrix<>();
 
 		for (Map.Entry<K1, Map<K2, V>> e1 : matrix.entrySet()) {
@@ -89,6 +89,34 @@ public class Matrix<K1, K2, V> {
 		}
 
 		return ret;
+	}
+
+	/**
+	 * Map a function to each value in a map
+	 *
+	 * @param function function
+	 */
+	public void map(Function<V, V> function) {
+		for (Map<K2, V> m : matrix.values()) {
+			for (K2 k2 : m.keySet()) {
+				m.compute(k2, (__, v) -> function.apply(v));
+			}
+		}
+	}
+
+	/**
+	 * Compute for single value in matrix
+	 *
+	 * @param k1       first key
+	 * @param k2       second key
+	 * @param function function
+	 */
+	public void compute(K1 k1, K2 k2, Function<V, V> function) {
+		Map<K2, V> map = matrix.get(k1);
+		if (map == null) {
+			return;
+		}
+		map.compute(k2, (__, v) -> function.apply(v));
 	}
 
 	@Override

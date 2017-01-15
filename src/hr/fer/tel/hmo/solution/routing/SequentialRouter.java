@@ -22,7 +22,7 @@ public abstract class SequentialRouter extends Router {
 
 	protected Topology topology;
 
-	private NodeProxy[] nodes;
+	NodeProxy[] nodes;
 	Map<NodeProxy, List<LinkProxy>> neighbors;
 
 	SequentialRouter(Topology topology) {

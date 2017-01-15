@@ -8,9 +8,11 @@ import hr.fer.tel.hmo.solution.proxies.NodeProxy;
 import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.util.Util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Router that finds routes sequentially
@@ -23,7 +25,7 @@ public abstract class SequentialRouter extends Router {
 	protected Topology topology;
 
 	NodeProxy[] nodes;
-	Map<NodeProxy, List<LinkProxy>> neighbors;
+	Matrix<NodeProxy, NodeProxy, LinkProxy> neighbors;
 
 	SequentialRouter(Topology topology) {
 		this.topology = topology;
@@ -39,14 +41,15 @@ public abstract class SequentialRouter extends Router {
 
 		// create neighbors
 		// node -> list of links which go out of it
-		neighbors = new HashMap<>();
 		Matrix<Integer, Integer, Link> links = topology.getNetwork().getLinks();
+
+		neighbors = new Matrix<>();
 		for (int n1 : links.keys()) {
-			neighbors.put(nodes[n1],
-					links.getFor(n1).entrySet()
-							.parallelStream()
-							.map(e -> new LinkProxy(nodes[e.getKey()], e.getValue()))
-							.collect(Collectors.toCollection(LinkedList::new)));
+			links.getFor(n1).entrySet().forEach(e -> neighbors.put(
+					nodes[n1],
+					nodes[e.getKey()],
+					new LinkProxy(nodes[e.getKey()], e.getValue()))
+			);
 		}
 
 	}

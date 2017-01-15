@@ -6,10 +6,8 @@ import hr.fer.tel.hmo.solution.proxies.NodeProxy;
 import hr.fer.tel.hmo.util.Matrix;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Find route using ant colony optimization.
@@ -34,13 +32,14 @@ public class AntColonyRouter extends SequentialRouter {
 		super.initialize();
 
 		pheromones = new Matrix<>();
-		for (Map.Entry<NodeProxy, List<LinkProxy>> e : neighbors.entrySet()) {
-			NodeProxy np = e.getKey();
-			List<LinkProxy> lps = e.getValue();
-
-			double tau = 1. / lps.size();
-			lps.forEach(lp -> pheromones.put(np.node.getIndex(), lp.to.node.getIndex(), tau));
+		for (NodeProxy np : neighbors.keys()) {
+			Map<NodeProxy, LinkProxy> map = neighbors.getFor(np);
+			double tau = 1. / map.size();
+			map.keySet().forEach(np_ -> pheromones.put(np.node.getIndex(), np_.node.getIndex(), tau));
 		}
+
+		System.out.println(pheromones);
+		System.exit(0);
 
 	}
 
@@ -51,13 +50,13 @@ public class AntColonyRouter extends SequentialRouter {
 
 		PowerRoute best = new PowerRoute();
 
-		Map<NodeProxy, List<LinkProxy>> valids = validNeighbors(delay, bandwidth);
+		Matrix<NodeProxy, NodeProxy, LinkProxy> valids =
+				neighbors.filter(lp -> lp.validParams(delay, bandwidth));
 
 		int iteration = 0;
 		while (iteration++ < ITERATIONS) {
 
 			PowerRoute currentBest = new PowerRoute();
-
 
 			for (int __ = 0; __ < NUM_ANTS; __++) {
 				currentBest = currentBest.better(ant(from, end, valids));
@@ -90,11 +89,9 @@ public class AntColonyRouter extends SequentialRouter {
 			nodes[prev].used = true;
 			for (int i = 1, N = best.route.size(); i < N; i++) {
 				int curr = best.route.get(i);
-				for (LinkProxy lp : neighbors.get(nodes[prev])){
-					if (lp.to.node.getIndex() == curr){
-						lp.used = true;
-					}
-				}
+				// use link
+				neighbors.get(nodes[prev], nodes[curr]).used = true;
+				// use node
 				nodes[curr].used = true;
 				prev = curr;
 			}
@@ -103,7 +100,7 @@ public class AntColonyRouter extends SequentialRouter {
 		return best.route;
 	}
 
-	private PowerRoute ant(NodeProxy from, NodeProxy to, Map<NodeProxy, List<LinkProxy>> neighbors) {
+	private PowerRoute ant(NodeProxy from, NodeProxy to, Matrix<NodeProxy, NodeProxy, LinkProxy> neighbors) {
 
 		// TODO
 
@@ -117,29 +114,6 @@ public class AntColonyRouter extends SequentialRouter {
 		route.add(to.node.getIndex());
 
 		return new PowerRoute(power, route);
-	}
-
-	/**
-	 * @param delay     delay
-	 * @param bandwidth bandwidth
-	 * @return map containing only valid links
-	 */
-	private Map<NodeProxy, List<LinkProxy>> validNeighbors(double delay, double bandwidth) {
-
-		final Map<NodeProxy, List<LinkProxy>> valid = new HashMap<>();
-
-		for (Map.Entry<NodeProxy, List<LinkProxy>> e : neighbors.entrySet()) {
-
-			List<LinkProxy> lps = e.getValue().stream()
-					.filter(lp -> lp.validParams(delay, bandwidth))
-					.collect(Collectors.toList());
-
-			if (!lps.isEmpty()) {
-				valid.put(e.getKey(), lps);
-			}
-		}
-
-		return valid;
 	}
 
 	private static class PowerRoute {

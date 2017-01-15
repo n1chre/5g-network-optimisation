@@ -2,6 +2,7 @@ package hr.fer.tel.hmo.util;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * This class is a wrapper around matrix class.
@@ -102,6 +103,27 @@ public class Matrix<K1, K2, V> {
 				m.compute(k2, (__, v) -> function.apply(v));
 			}
 		}
+	}
+
+	/**
+	 * Create a matrix with only filtered values
+	 *
+	 * @param filter used to filter values
+	 * @return new matrix
+	 */
+	public Matrix<K1, K2, V> filter(Predicate<V> filter) {
+		final Matrix<K1, K2, V> _matrix = new Matrix<>();
+
+		for (Map.Entry<K1, Map<K2, V>> e1 : matrix.entrySet()) {
+			for (Map.Entry<K2, V> e2 : e1.getValue().entrySet()) {
+				V v = e2.getValue();
+				if (filter.test(v)) {
+					_matrix.put(e1.getKey(), e2.getKey(), v);
+				}
+			}
+		}
+
+		return _matrix;
 	}
 
 	/**

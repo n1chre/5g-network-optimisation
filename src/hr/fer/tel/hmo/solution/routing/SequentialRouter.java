@@ -20,10 +20,35 @@ public abstract class SequentialRouter extends Router {
 	// delay is always 20
 	private static final double DEFAULT_DELAY = 20.0;
 
-	private Topology topology;
+	protected Topology topology;
+
+	private NodeProxy[] nodes;
+	Map<NodeProxy, List<LinkProxy>> neighbors;
 
 	SequentialRouter(Topology topology) {
 		this.topology = topology;
+	}
+
+	protected void initialize() {
+
+		int numNodes = topology.getNetwork().getNumberOfNodes();
+		nodes = new NodeProxy[numNodes];
+		for (int i = 0; i < numNodes; i++) {
+			nodes[i] = new NodeProxy(topology.getNetwork().getNode(i));
+		}
+
+		// create neighbors
+		// node -> list of links which go out of it
+		neighbors = new HashMap<>();
+		Matrix<Integer, Integer, Link> links = topology.getNetwork().getLinks();
+		for (int n1 : links.keys()) {
+			neighbors.put(nodes[n1],
+					links.getFor(n1).entrySet()
+							.parallelStream()
+							.map(e -> new LinkProxy(nodes[e.getKey()], e.getValue()))
+							.collect(Collectors.toCollection(LinkedList::new)));
+		}
+
 	}
 
 	/**
@@ -33,34 +58,16 @@ public abstract class SequentialRouter extends Router {
 	 * @param end       end node
 	 * @param delay     maximal delay
 	 * @param bandwidth demanded bandwidth
-	 * @param neighbors neighbors map
 	 * @return found route or null if it can find one
 	 */
-	protected abstract List<Integer> path(NodeProxy from, NodeProxy end, double delay, double bandwidth,
-	                                      Map<NodeProxy, List<LinkProxy>> neighbors);
+	protected abstract List<Integer> path(NodeProxy from, NodeProxy end, double delay, double bandwidth);
 
 	@Override
 	public Matrix<Integer, Integer, Route> findRouting(Placement placement) {
 
+		initialize();
+
 		final Matrix<Integer, Integer, Route> routes = new Matrix<>();
-
-		int numNodes = topology.getNetwork().getNumberOfNodes();
-		NodeProxy[] nodes = new NodeProxy[numNodes];
-		for (int i = 0; i < numNodes; i++) {
-			nodes[i] = new NodeProxy(topology.getNetwork().getNode(i));
-		}
-
-		// create neighbors
-		// node -> list of links which go out of it
-		Map<NodeProxy, List<LinkProxy>> neighbors = new HashMap<>();
-		Matrix<Integer, Integer, Link> links = topology.getNetwork().getLinks();
-		for (int n1 : links.keys()) {
-			neighbors.put(nodes[n1],
-					links.getFor(n1).entrySet()
-							.parallelStream()
-							.map(e -> new LinkProxy(nodes[e.getKey()], e.getValue()))
-							.collect(Collectors.toCollection(LinkedList::new)));
-		}
 
 		// create cache
 		// cache[component index] = node index (component -> server -> node)
@@ -106,8 +113,7 @@ public abstract class SequentialRouter extends Router {
 
 			List<Integer> r = path(
 					nodes[node1], nodes[node2],
-					DEFAULT_DELAY, t.bandwidth,
-					neighbors
+					DEFAULT_DELAY, t.bandwidth
 			);
 			if (r == null) {
 				return null;

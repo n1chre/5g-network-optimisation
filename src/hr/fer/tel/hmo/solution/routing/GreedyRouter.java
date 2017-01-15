@@ -21,8 +21,8 @@ public class GreedyRouter extends SequentialRouter {
 	}
 
 	@Override
-	protected List<Integer> path(NodeProxy from, NodeProxy end, double delay, double bandwidth, Map<NodeProxy, List<LinkProxy>> neighbors) {
-		return path(from, end, delay, bandwidth, neighbors, new HashSet<>(), new ArrayList<>());
+	protected List<Integer> path(NodeProxy from, NodeProxy end, double delay, double bandwidth) {
+		return path(from, end, delay, bandwidth, new HashSet<>(), new ArrayList<>());
 	}
 
 	/**
@@ -32,13 +32,11 @@ public class GreedyRouter extends SequentialRouter {
 	 * @param end       end node
 	 * @param delay     maximal delay
 	 * @param bandwidth demanded bandwidth
-	 * @param neighbors neighbors map
 	 * @param forbidden forbidden nodes
 	 * @param path      current path
 	 * @return list of nodes or null if route not found
 	 */
 	private List<Integer> path(NodeProxy from, NodeProxy end, double delay, double bandwidth,
-	                           Map<NodeProxy, List<LinkProxy>> neighbors,
 	                           HashSet<Integer> forbidden, List<Integer> path) {
 		path.add(from.node.getIndex());
 
@@ -64,7 +62,7 @@ public class GreedyRouter extends SequentialRouter {
 		best.used = true;
 		best.bandwidth -= bandwidth;
 
-		return path(best.to, end, delay - best.delay, bandwidth, neighbors, forbidden, path);
+		return path(best.to, end, delay - best.delay, bandwidth, forbidden, path);
 	}
 
 	/**

@@ -19,6 +19,15 @@ public class Util {
 		// can't be created
 	}
 
+	/**
+	 * Perform roulette selection on given collection
+	 * it should hold that sum(probability(t) for t in ts) = 1
+	 *
+	 * @param ts          collection
+	 * @param probability knows what is probability of choosing each element
+	 * @param extractor   knows how to extract value from each element
+	 * @return chosen unit
+	 */
 	public static <T, R> R roulette(
 			Collection<T> ts,
 			Function<T, Double> probability,

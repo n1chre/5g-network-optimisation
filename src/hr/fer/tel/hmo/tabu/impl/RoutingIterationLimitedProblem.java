@@ -12,7 +12,7 @@ public abstract class RoutingIterationLimitedProblem extends IterationLimitedPro
 	/**
 	 * Maximum number of iterations to run
 	 */
-	private static final int MAX_ITERATIONS = 4444;
+	private static final int MAX_ITERATIONS = 10000;
 
 	Evaluator evaluator;
 	Router router;
@@ -39,7 +39,7 @@ public abstract class RoutingIterationLimitedProblem extends IterationLimitedPro
 	 * @param solution solution
 	 * @return wrapped solution
 	 */
-	 RoutingSolution toRS(Solution solution) {
+	RoutingSolution toRS(Solution solution) {
 		return new RoutingSolution(solution, evaluator.fitness(solution));
 	}
 }

@@ -19,7 +19,7 @@ import java.util.function.Function;
  */
 public abstract class SequentialRouter extends Router {
 
-	// delay is always 20
+	// delay is always 20 FIXME
 	private static final double DEFAULT_DELAY = 20.0;
 
 	protected Topology topology;

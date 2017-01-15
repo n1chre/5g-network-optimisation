@@ -4,10 +4,9 @@ import hr.fer.tel.hmo.network.Topology;
 import hr.fer.tel.hmo.solution.proxies.LinkProxy;
 import hr.fer.tel.hmo.solution.proxies.NodeProxy;
 import hr.fer.tel.hmo.util.Matrix;
+import hr.fer.tel.hmo.util.Util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Find route using ant colony optimization.
@@ -37,10 +36,6 @@ public class AntColonyRouter extends SequentialRouter {
 			double tau = 1. / map.size();
 			map.keySet().forEach(np_ -> pheromones.put(np.node.getIndex(), np_.node.getIndex(), tau));
 		}
-
-		System.out.println(pheromones);
-		System.exit(0);
-
 	}
 
 	@Override
@@ -59,20 +54,20 @@ public class AntColonyRouter extends SequentialRouter {
 			PowerRoute currentBest = new PowerRoute();
 
 			for (int __ = 0; __ < NUM_ANTS; __++) {
-				currentBest = currentBest.better(ant(from, end, valids));
+				PowerRoute ant = ant(from, end, valids);
+				currentBest = currentBest.better(ant);
 			}
 
 			if (!currentBest.exists()) {
-				return null;
+				continue;
 			}
-
-			// TODO delta = f(power)
-			double delta = 1. / currentBest.power;
 
 			// EVAPORATION
 			pheromones.map(tau -> tau * (1 - RHO));
 
 			// REINFORCEMENT
+			double delta = 1. / currentBest.power; // TODO delta = f(power)
+
 			int prev = currentBest.route.get(0);
 			for (int i = 1, N = currentBest.route.size(); i < N; i++) {
 				int curr = currentBest.route.get(i);
@@ -100,20 +95,78 @@ public class AntColonyRouter extends SequentialRouter {
 		return best.route;
 	}
 
+	/**
+	 * Use ant to find a feasible route
+	 *
+	 * @param from      from node
+	 * @param to        to node
+	 * @param neighbors neighbors map
+	 * @return feasible route or null if none found
+	 */
 	private PowerRoute ant(NodeProxy from, NodeProxy to, Matrix<NodeProxy, NodeProxy, LinkProxy> neighbors) {
-
-		// TODO
-
 		List<Integer> route = new ArrayList<>();
 		double power = 0.0;
 
-		while (!from.equals(to)) {
+		// initial structures
+		HashSet<NodeProxy> newlyUsedNodes = new HashSet<>();
+		HashSet<LinkProxy> newlyUsedLinks = new HashSet<>();
+		newlyUsedNodes.add(from);
 
-		}
+		do {
+			route.add(from.node.getIndex());
+			if (from.equals(to)) {
+				break;
+			}
 
-		route.add(to.node.getIndex());
+			newlyUsedNodes.add(from);
+
+			List<LinkProxy> links = new ArrayList<>(neighbors.getFor(from).values());
+			links.removeIf(lp -> newlyUsedNodes.contains(lp.to));
+			links.removeIf(newlyUsedLinks::contains);
+
+			LinkProxy lp = chooseLink(from.node.getIndex(), links, newlyUsedLinks, newlyUsedNodes);
+			if (lp == null) {
+				return null;
+			}
+
+			from = lp.to;
+
+			power += lp.powerUp(newlyUsedNodes, newlyUsedLinks);
+
+			newlyUsedLinks.add(lp);
+			newlyUsedNodes.add(from);
+
+		} while (true);
 
 		return new PowerRoute(power, route);
+	}
+
+	private LinkProxy chooseLink(int from, Collection<LinkProxy> links,
+	                             HashSet<LinkProxy> usedLinks, HashSet<NodeProxy> usedNodes) {
+
+		class tmp {
+			private LinkProxy lp;
+			private double prob;
+
+			private tmp(LinkProxy lp) {
+				this.lp = lp;
+				double tau = pheromones.get(from, lp.to.node.getIndex());
+				double ni = Math.max(lp.powerUp(usedNodes, usedLinks), Util.EPS);
+				prob = Math.pow(tau, ALPHA) * Math.pow(ni, BETA);
+			}
+		}
+
+		List<tmp> tmps = new LinkedList<>();
+
+		double total = 0.0;
+		for (LinkProxy lp : links) {
+			tmp t = new tmp(lp);
+			total += t.prob;
+			tmps.add(t);
+		}
+
+		double _total = total;
+		return Util.roulette(tmps, t -> t.prob / _total, t -> t.lp);
 	}
 
 	private static class PowerRoute {

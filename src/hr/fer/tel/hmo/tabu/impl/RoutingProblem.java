@@ -18,39 +18,40 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 
 	private Set<RoutingSolution> dontUseFirst;
 	private Set<RoutingSolution> dontUseSecond;
-	private Set<RoutingSolution> dontUseThird;
 
 	public RoutingProblem(Evaluator evaluator, Router router, Solution initial) {
 		super(evaluator, router, initial);
 		dontUseFirst = new HashSet<>();
 		dontUseSecond = new HashSet<>();
-		dontUseThird = new HashSet<>();
 	}
 
 	@Override
 	public Collection<RoutingSolution> neighborhood(RoutingSolution curr) {
 
 		Set<RoutingSolution> neighbors = new HashSet<>();
-		Collection<Placement> nbrs = new HashSet<>();
 
-		Placement p = curr.getSolution().getPlacement().copy();
-		int C = p.getNumberOfComponents();
+		int N = 42;
+		for (int i = 0; i < N; i++) {
 
-		p.neighborsMore(5).stream().filter(evaluator::isValid).forEach(nbrs::add);
-
-		for (Placement p_ : nbrs) {
-			Matrix<Integer, Integer, Route> rts = router.findRouting(p_);
-			if (rts != null) {
-				RoutingSolution rs = toRS(new Solution(p_, rts));
-				// filter neighbors based on tabu list
-				if (dontUseFirst.contains(rs) || dontUseSecond.contains(rs) || dontUseThird.contains(rs)) {
-					continue;
-				}
-				neighbors.add(rs);
+			Placement p = curr.getSolution().getPlacement().neighbor(6);
+			if (!evaluator.isValid(p)) {
+				continue;
 			}
+
+			Matrix<Integer, Integer, Route> rts = router.findRouting(p);
+			if (rts == null) {
+				continue;
+			}
+
+			RoutingSolution rs = toRS(new Solution(p, rts));
+			// filter neighbors based on tabu list
+			if (dontUseFirst.contains(rs) || dontUseSecond.contains(rs)) {
+				continue;
+			}
+			neighbors.add(rs);
 		}
 
-		dontUseThird = dontUseSecond;
+
 		dontUseSecond = dontUseFirst;
 		dontUseFirst = neighbors;
 

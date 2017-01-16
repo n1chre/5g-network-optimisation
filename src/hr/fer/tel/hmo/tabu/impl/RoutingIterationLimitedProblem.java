@@ -12,7 +12,7 @@ public abstract class RoutingIterationLimitedProblem extends IterationLimitedPro
 	/**
 	 * Maximum number of iterations to run
 	 */
-	private static final int MAX_ITERATIONS = 10000;
+	private static final int MAX_ITERATIONS = 1000;
 
 	Evaluator evaluator;
 	Router router;

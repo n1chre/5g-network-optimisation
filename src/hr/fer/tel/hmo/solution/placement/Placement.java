@@ -81,32 +81,13 @@ public class Placement {
 		return neighbors;
 	}
 
-	public List<Placement> neighborsMore(int n) {
-		List<Placement> lst = new LinkedList<>();
-
+	public Placement neighbor(int n) {
 		int[] indexes = Util.rndIndexes(placement.length, n);
-
-		int NS = 50;
-		while (NS-- > 0) {
-
-			Placement p = copy();
-
-			for (int i = n - 1; i > 0; --i) {
-				Util.swap(p.placement, indexes[i], indexes[Util.randomInt(i)]);
-			}
-			lst.add(p);
+		Placement p = copy();
+		for (int i = n - 1; i > 0; --i) {
+			Util.swap(p.placement, indexes[i], indexes[Util.randomInt(i)]);
 		}
-		return lst;
-	}
-
-	/**
-	 * Place a component on a server
-	 *
-	 * @param component component to place
-	 * @param server    server on which it goes
-	 */
-	public void place(Component component, Server server) {
-		place(component.getIndex(), server.getIndex());
+		return p;
 	}
 
 	/**

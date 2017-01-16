@@ -56,13 +56,22 @@ public class Util {
 		throw new RuntimeException("Can't happen");
 	}
 
+	/**
+	 * Create c random indexes from [0,n> interval
+	 *
+	 * @param n parameter n
+	 * @param c parameter c
+	 * @return random indexes
+	 */
 	public static int[] rndIndexes(int n, int c) {
-		int[] indexes = new int[n];
+		int[] idxs = new int[n];
 		for (int i = 0; i < n; i++) {
-			indexes[i] = i;
+			idxs[i] = i;
 		}
-		shuffle(indexes);
-		return Arrays.copyOf(indexes, c);
+		for (int i = 0; i < c; i++) {
+			swap(idxs, i, i + randomInt(n - i));
+		}
+		return Arrays.copyOf(idxs, c);
 	}
 
 	/**
@@ -120,15 +129,6 @@ public class Util {
 		return RANDOM.nextDouble();
 	}
 
-	/**
-	 * @param lo lower bound
-	 * @param hi higher bound
-	 * @return randomize double with uniform distribution on [lo,hi]
-	 */
-	public static double randomDouble(double lo, double hi) {
-		return lo + (hi - lo) * Util.randomDouble();
-	}
-
 	public static <T> void shuffle(T[] arr) {
 		int n = arr.length;
 		if (n <= 1) {
@@ -139,7 +139,14 @@ public class Util {
 		}
 	}
 
-	public static <T> void swap(T[] arr, int i, int j) {
+	/**
+	 * Swap values in array
+	 *
+	 * @param arr array
+	 * @param i   index i
+	 * @param j   index j
+	 */
+	private static <T> void swap(T[] arr, int i, int j) {
 		T t = arr[i];
 		arr[i] = arr[j];
 		arr[j] = t;

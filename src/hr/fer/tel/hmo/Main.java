@@ -25,17 +25,14 @@ import java.nio.file.Paths;
  */
 public class Main {
 
-	private static final int TABU_RUNS = 420000;
+	private static final int TABU_RUNS = 100;
 	private static final Object RS_LOCK = new Object();
 
 	private static RoutingSolution bestRS = null;
 
 	public static void main(String[] args) {
 
-		int x = 1;
-
-		String name = "instance" + (x == 0 ? "_small" : "-bez_43_44") + ".txt";
-		args = new String[]{"/Users/fhrenic/Programming/vnf-placer/" + name};
+//		args = new String[]{"./instance.txt"};
 
 		InputStream stream;
 		if (args.length > 0) {
@@ -136,7 +133,7 @@ public class Main {
 						bestRS = rs;
 						System.err.printf("Found new best solution (%.2f)!%n", -bestRS.getFitness());
 						try {
-							String fname = String.format("/Users/fhrenic/sols2/sol_%d.txt", (int) -rs.getFitness());
+							String fname = String.format("/Users/fhrenic/sols2/sol_%.2f.txt", -rs.getFitness());
 							Util.toFile(rs.getSolution().toString(), fname);
 						} catch (IOException ex) {
 							ex.printStackTrace();

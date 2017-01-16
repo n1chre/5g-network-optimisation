@@ -22,12 +22,12 @@ public abstract class Placer {
 	/**
 	 * Static network topology
 	 */
-	Topology topology;
+	final Topology topology;
 
 	/**
 	 * Function to test if a placement is valid
 	 */
-	Function<Placement, Boolean> isValid;
+	final Function<Placement, Boolean> isValid;
 
 	Placer(Topology topology, Function<Placement, Boolean> isValid) {
 		this.topology = topology;

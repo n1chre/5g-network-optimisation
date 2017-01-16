@@ -12,17 +12,17 @@ public class Network {
 	/**
 	 * All nodes
 	 */
-	private Node[] nodes;
+	private final Node[] nodes;
 
 	/**
 	 * All servers
 	 */
-	private Server[] servers;
+	private final Server[] servers;
 
 	/**
 	 * links[from][to] = link
 	 */
-	private Matrix<Integer, Integer, Link> links;
+	private final Matrix<Integer, Integer, Link> links;
 
 	/**
 	 * Create a new network with desired number of nodes and servers.
@@ -106,10 +106,9 @@ public class Network {
 			return false;
 		}
 
-		boolean ret = links.put(n1, n2, link) == null;
-//		ret &= links.put(n2, n1, link) == null;
+		//		ret &= links.put(n2, n1, link) == null;
 
-		return ret;
+		return links.put(n1, n2, link) == null;
 	}
 
 	/**

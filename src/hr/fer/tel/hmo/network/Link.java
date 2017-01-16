@@ -5,11 +5,11 @@ package hr.fer.tel.hmo.network;
  */
 public class Link {
 
-	private double bandwidth;
+	private final double bandwidth;
 
-	private double powerConsumption;
+	private final double powerConsumption;
 
-	private double delay;
+	private final double delay;
 
 	/**
 	 * Create a new link with given parameters

@@ -83,10 +83,10 @@ public class Main {
 	 */
 	private static class Solver implements Runnable {
 
-		private Evaluator evaluator;
-		private Router router;
-		private Placer placer;
-		private int id;
+		private final Evaluator evaluator;
+		private final Router router;
+		private final Placer placer;
+		private final int id;
 
 		Solver(Evaluator evaluator, Router router, Placer placer, int id) {
 			this.evaluator = evaluator;

@@ -1,6 +1,5 @@
 package hr.fer.tel.hmo.vnf;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -8,9 +7,9 @@ import java.util.List;
  */
 public class Component {
 
-	private int index;
+	private final int index;
 
-	private List<Double> resources;
+	private final List<Double> resources;
 
 	/**
 	 * Create a new component that needs resources

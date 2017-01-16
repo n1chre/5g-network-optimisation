@@ -22,7 +22,7 @@ public abstract class SequentialRouter extends Router {
 	// delay is always 20 FIXME
 	private static final double DEFAULT_DELAY = 20.0;
 
-	protected Topology topology;
+	private final Topology topology;
 
 	NodeProxy[] nodes;
 	Matrix<NodeProxy, NodeProxy, LinkProxy> neighbors;
@@ -31,7 +31,7 @@ public abstract class SequentialRouter extends Router {
 		this.topology = topology;
 	}
 
-	protected void initialize() {
+	private void initialize() {
 
 		int numNodes = topology.getNetwork().getNumberOfNodes();
 		nodes = new NodeProxy[numNodes];

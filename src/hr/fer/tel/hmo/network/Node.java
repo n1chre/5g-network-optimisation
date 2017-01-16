@@ -5,9 +5,9 @@ package hr.fer.tel.hmo.network;
  */
 public class Node {
 
-	private int index;
+	private final int index;
 
-	private double powerConsumption;
+	private final double powerConsumption;
 
 	/**
 	 * Create a new node with given power consumption and index.

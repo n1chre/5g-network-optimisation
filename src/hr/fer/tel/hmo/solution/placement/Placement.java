@@ -1,6 +1,5 @@
 package hr.fer.tel.hmo.solution.placement;
 
-import hr.fer.tel.hmo.network.Server;
 import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 
@@ -25,7 +24,7 @@ public class Placement {
 	/**
 	 * Number of possible servers
 	 */
-	private int numberOfServers;
+	private final int numberOfServers;
 
 	/**
 	 * Create a new empty placement.
@@ -41,7 +40,7 @@ public class Placement {
 	/**
 	 * @return an exact copy of this placement
 	 */
-	public Placement copy() {
+	private Placement copy() {
 		Placement cp = new Placement(placement.length, numberOfServers);
 		cp.placement = Arrays.copyOf(this.placement, this.placement.length);
 		return cp;
@@ -59,7 +58,7 @@ public class Placement {
 	/**
 	 * Permute this placement
 	 */
-	public void permute() {
+	private void permute() {
 		Util.shuffle(placement);
 	}
 
@@ -118,10 +117,6 @@ public class Placement {
 	 */
 	public int getPlacementFor(int componentIndex) {
 		return placement[componentIndex];
-	}
-
-	public int getNumberOfComponents() {
-		return placement.length;
 	}
 
 	@Override

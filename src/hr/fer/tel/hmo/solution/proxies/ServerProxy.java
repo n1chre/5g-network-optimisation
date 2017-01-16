@@ -4,20 +4,21 @@ import hr.fer.tel.hmo.network.Server;
 import hr.fer.tel.hmo.vnf.Component;
 
 /**
- * Created by fhrenic on 13/01/2017.
+ * Proxy class for Server
  */
 public class ServerProxy {
 
-	public int index;
-	public double pmin, pmax;
+	public final int index;
+	private final double pmin;
+	private final double pmax;
 
-	public double totalProcRes;
-	public double totalMemRes;
+	private final double totalProcRes;
+	private final double totalMemRes;
 
-	public double usedProcRes;
-	public double usedMemRes;
+	private double usedProcRes;
+	private double usedMemRes;
 
-	public NodeProxy np;
+	private final NodeProxy np;
 
 	public ServerProxy(Server s, NodeProxy np) {
 		index = s.getIndex();

@@ -3,11 +3,11 @@ package hr.fer.tel.hmo.solution.proxies;
 import hr.fer.tel.hmo.network.Node;
 
 /**
- * Created by fhrenic on 13/01/2017.
+ * Proxy class for Node
  */
 public class NodeProxy {
 
-	public Node node;
+	public final Node node;
 	public boolean used;
 
 	public NodeProxy(Node node) {

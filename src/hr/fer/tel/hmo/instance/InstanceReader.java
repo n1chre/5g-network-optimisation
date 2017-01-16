@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 /**
  * Class used for reading instance definition from stream
  */
-public class InstanceReader implements AutoCloseable {
+class InstanceReader implements AutoCloseable {
 
 	/**
 	 * Regular expression for finding numbers in double format
@@ -22,7 +22,7 @@ public class InstanceReader implements AutoCloseable {
 	/**
 	 * Reader used for reading lines
 	 */
-	private BufferedReader reader;
+	private final BufferedReader reader;
 
 	/**
 	 * Current line number for notifying about errors

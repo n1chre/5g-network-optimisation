@@ -14,9 +14,9 @@ public abstract class RoutingIterationLimitedProblem extends IterationLimitedPro
 	 */
 	private static final int MAX_ITERATIONS = 1000;
 
-	Evaluator evaluator;
-	Router router;
-	private RoutingSolution initial;
+	final Evaluator evaluator;
+	final Router router;
+	private final RoutingSolution initial;
 
 	RoutingIterationLimitedProblem(Evaluator evaluator, Router router, Solution initial) {
 		super(MAX_ITERATIONS);

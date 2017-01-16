@@ -9,7 +9,7 @@ import hr.fer.tel.hmo.tabu.alg.TabuProblem;
 abstract class IterationLimitedProblem<S> implements TabuProblem<S> {
 
 	private int iteration;
-	private int maxIterations;
+	private final int maxIterations;
 
 	IterationLimitedProblem(int maxIterations) {
 		this.maxIterations = maxIterations;

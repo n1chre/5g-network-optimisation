@@ -49,8 +49,7 @@ public class GreedyPlacer extends Placer {
 
 		for (Component c : cs) {
 
-			ServerProxy sp = null;
-			double power = Double.MAX_VALUE;
+			ServerProxy sp;
 
 			List<ServerProxy> sps_ = Arrays.stream(sps)
 					.filter(s -> s.canGo(c))
@@ -67,18 +66,6 @@ public class GreedyPlacer extends Placer {
 			} else {
 				sp = sps_.get(3);
 			}
-//
-//			for (ServerProxy sp_ : sps) {
-//				if (!sp_.canGo(c)) {
-//					continue;
-//				}
-//				double pow = sp_.powerUp(c);
-//
-//				if (pow < power) {
-//					power = pow;
-//					sp = sp_;
-//				}
-//			}
 
 			if (sp == null) {
 				System.out.println("idiote");

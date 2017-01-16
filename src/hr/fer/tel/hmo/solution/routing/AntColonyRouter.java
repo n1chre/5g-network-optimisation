@@ -184,8 +184,8 @@ public class AntColonyRouter extends SequentialRouter {
 	}
 
 	private static class PowerRoute {
-		double power;
-		List<Integer> route;
+		final double power;
+		final List<Integer> route;
 
 		PowerRoute() {
 			this(Double.MAX_VALUE, null);

@@ -12,32 +12,32 @@ public class Server {
 	/**
 	 * Server's index
 	 */
-	private int index;
+	private final int index;
 
 	/**
 	 * Minimal power consumption. Uses this much power when 0% resources are used
 	 */
-	private double pmin;
+	private final double pmin;
 
 	/**
 	 * Maximal power consumption. Uses this much power when 100% resources are used
 	 */
-	private double pmax;
+	private final double pmax;
 
 	/**
 	 * Node that this server is connected to.
 	 */
-	private Node node;
+	private final Node node;
 
 	/**
 	 * Available resources
 	 */
-	private List<Double> resources;
+	private final List<Double> resources;
 
 	/**
 	 * Available processor resource
 	 */
-	private double processorResource;
+	private final double processorResource;
 
 	/**
 	 * Create a new server

@@ -8,9 +8,9 @@ import hr.fer.tel.hmo.solution.Solution;
  */
 public class RoutingSolution {
 
-	private double fitness;
+	private final double fitness;
 
-	private Solution solution;
+	private final Solution solution;
 
 	RoutingSolution(Solution solution, double fitness) {
 		this.fitness = fitness;

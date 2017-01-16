@@ -20,7 +20,7 @@ public class Evaluator {
 	/**
 	 * Network topology
 	 */
-	private Topology topology;
+	private final Topology topology;
 
 	public Evaluator(Topology topology) {
 		this.topology = topology;
@@ -37,7 +37,7 @@ public class Evaluator {
 	/**
 	 * Assert that solution is correct
 	 *
-	 * @param solution
+	 * @param solution solution you want to check
 	 */
 	public void assertSolution(Solution solution) {
 		if (!isValid(solution)) {
@@ -78,7 +78,7 @@ public class Evaluator {
 	 * @param solution possible solution
 	 * @return total power consumption
 	 */
-	public double evaluate(Solution solution) {
+	private double evaluate(Solution solution) {
 		Placement placement = solution.getPlacement();
 		Matrix<Integer, Integer, Route> routes = solution.getRoutes();
 
@@ -158,7 +158,7 @@ public class Evaluator {
 	 * @param s possible solution
 	 * @return true if solution is valid
 	 */
-	public boolean isValid(Solution s) {
+	private boolean isValid(Solution s) {
 		return isLatencyValid(s) && isBandwidthValid(s);
 	}
 

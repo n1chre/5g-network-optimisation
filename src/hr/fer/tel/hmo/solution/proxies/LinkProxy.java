@@ -11,10 +11,10 @@ import java.util.HashSet;
  */
 public class LinkProxy implements Comparable<LinkProxy> {
 
-	public NodeProxy to;
-	public double delay;
+	public final NodeProxy to;
+	public final double delay;
 	public double bandwidth;
-	private double power;
+	private final double power;
 	public boolean used;
 
 	public LinkProxy(NodeProxy to, Link link) {
@@ -41,7 +41,7 @@ public class LinkProxy implements Comparable<LinkProxy> {
 	 *
 	 * @return power up
 	 */
-	public double powerUp() {
+	private double powerUp() {
 		double power = 0.0;
 		if (!used) {
 			power += this.power;
@@ -70,7 +70,7 @@ public class LinkProxy implements Comparable<LinkProxy> {
 
 	public static class LinkComp implements Comparator<LinkProxy> {
 
-		private NodeProxy goalNode;
+		private final NodeProxy goalNode;
 
 		public LinkComp(NodeProxy goalNode) {
 			this.goalNode = goalNode;

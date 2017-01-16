@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
  */
 public class ServiceChain implements Iterable<Component> {
 
-	private List<Component> components;
+	private final List<Component> components;
 
-	private double latency;
+	private final double latency;
 
 	/**
 	 * Create a new service chain with desired maximal latency

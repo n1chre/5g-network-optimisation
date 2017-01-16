@@ -12,12 +12,12 @@ public class Route {
 	/**
 	 * Index of a component from which we route traffic
 	 */
-	private int from;
+	private final int from;
 
 	/**
 	 * Index of a component to which we route traffic
 	 */
-	private int to;
+	private final int to;
 
 	/**
 	 * Indexes of all nodes on this route

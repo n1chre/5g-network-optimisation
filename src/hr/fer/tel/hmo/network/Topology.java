@@ -14,22 +14,22 @@ public class Topology {
 	/**
 	 * Network configuration used to evaluate placement and routing
 	 */
-	private Network network;
+	private final Network network;
 
 	/**
 	 * Components that are placed onto servers
 	 */
-	private Component[] components;
+	private final Component[] components;
 
 	/**
 	 * List of service chains
 	 */
-	private List<ServiceChain> serviceChains;
+	private final List<ServiceChain> serviceChains;
 
 	/**
 	 * List of demanded bandwidth from one component to another.
 	 */
-	private Matrix<Integer, Integer, Double> demands;
+	private final Matrix<Integer, Integer, Double> demands;
 
 	public Topology(Network network, Component[] components, Matrix<Integer, Integer, Double> demands,
 	                List<ServiceChain> serviceChains) {

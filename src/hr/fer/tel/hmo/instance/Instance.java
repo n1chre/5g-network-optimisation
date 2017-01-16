@@ -369,11 +369,7 @@ public class Instance {
 			return false;
 		}
 
-		if (!Util.checkMatrix(vnfDemands, -1, 3)) {
-			return false;
-		}
-
-		return true;
+		return Util.checkMatrix(vnfDemands, -1, 3);
 	}
 
 	public Topology getTopology() {

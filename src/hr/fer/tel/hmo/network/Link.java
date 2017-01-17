@@ -37,7 +37,36 @@ public class Link {
 	}
 
 	@Override
-	public String toString() {
-		return String.format("Link[%.2f,%.2f,%.2f]", bandwidth, powerConsumption, delay);
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Link)) {
+			return false;
+		}
+
+		Link link = (Link) o;
+
+		if (Double.compare(link.bandwidth, bandwidth) != 0) {
+			return false;
+		}
+		if (Double.compare(link.powerConsumption, powerConsumption) != 0) {
+			return false;
+		}
+		return Double.compare(link.delay, delay) == 0;
 	}
+
+	@Override
+	public int hashCode() {
+		int result;
+		long temp;
+		temp = Double.doubleToLongBits(bandwidth);
+		result = (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(powerConsumption);
+		result = 31 * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(delay);
+		result = 31 * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
 }

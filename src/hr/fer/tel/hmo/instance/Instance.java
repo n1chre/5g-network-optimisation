@@ -1,9 +1,6 @@
 package hr.fer.tel.hmo.instance;
 
-import hr.fer.tel.hmo.network.Link;
-import hr.fer.tel.hmo.network.Network;
-import hr.fer.tel.hmo.network.Node;
-import hr.fer.tel.hmo.network.Topology;
+import hr.fer.tel.hmo.network.*;
 import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
@@ -233,7 +230,8 @@ public class Instance {
 				continue; // no node was found
 			}
 
-			if (!network.addServer(serverIndex, pmin, pmax, nodeIdx, resources)) {
+			Server s = new Server(serverIndex, pmin, pmax, network.getNode(nodeIdx), resources);
+			if (!network.addServer(s)) {
 				networkException("Server configured badly");
 			}
 		}

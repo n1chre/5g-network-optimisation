@@ -20,6 +20,14 @@ public class Node {
 		this.powerConsumption = powerConsumption;
 	}
 
+	public int getIndex() {
+		return index;
+	}
+
+	public double getPowerConsumption() {
+		return powerConsumption;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -39,11 +47,4 @@ public class Node {
 		return index;
 	}
 
-	public int getIndex() {
-		return index;
-	}
-
-	public double getPowerConsumption() {
-		return powerConsumption;
-	}
 }

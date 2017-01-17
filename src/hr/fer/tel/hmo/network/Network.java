@@ -2,7 +2,7 @@ package hr.fer.tel.hmo.network;
 
 import hr.fer.tel.hmo.util.Matrix;
 
-import java.util.List;
+import java.util.function.Function;
 
 /**
  * Represents the whole network in this project.
@@ -74,19 +74,7 @@ public class Network {
 	 * @return whether a node was added
 	 */
 	public boolean addNode(Node node) {
-		int index = node.getIndex();
-
-		if (index < 0 || index >= nodes.length) {
-			return false;
-		}
-
-		if (nodes[index] != null) {
-			return false;
-		}
-
-		nodes[index] = node;
-
-		return true;
+		return insert(node, Node::getIndex, nodes);
 	}
 
 	/**
@@ -105,8 +93,6 @@ public class Network {
 		if (nodes[n1] == null || nodes[n2] == null) {
 			return false;
 		}
-
-		//		ret &= links.put(n2, n1, link) == null;
 
 		return links.put(n1, n2, link) == null;
 	}
@@ -134,29 +120,32 @@ public class Network {
 	/**
 	 * Connect new server to this network
 	 *
-	 * @param serverIndex server's index
-	 * @param pmin        minimal power consumption
-	 * @param pmax        maximal power consumption
-	 * @param nodeIdx     index of node to which it is connected
-	 * @param resources   resources that it uses
+	 * @param server server
 	 * @return true if it was added and connected
 	 */
-	public boolean addServer(int serverIndex, double pmin, double pmax, int nodeIdx, List<Double> resources) {
-		if (serverIndex < 0 || serverIndex >= servers.length) {
-			return false;
-		}
-		if (nodeIdx < 0 || nodeIdx >= nodes.length) {
+	public boolean addServer(Server server) {
+		return insert(server, Server::getIndex, servers);
+	}
+
+	/**
+	 * Insert element into an array
+	 *
+	 * @param t        element
+	 * @param getIndex index extractor
+	 * @param ts       array of t's
+	 * @return true if it was inserted (if ts[index] was null)
+	 */
+	private <T> boolean insert(T t, Function<T, Integer> getIndex, T[] ts) {
+		final int index = getIndex.apply(t);
+		if (index < 0 || index >= ts.length) {
 			return false;
 		}
 
-		if (servers[serverIndex] != null) {
+		if (ts[index] != null) {
 			return false;
 		}
 
-		Node node = nodes[nodeIdx];
-		Server server = new Server(serverIndex, pmin, pmax, node, resources);
-
-		servers[serverIndex] = server;
+		ts[index] = t;
 
 		return true;
 	}

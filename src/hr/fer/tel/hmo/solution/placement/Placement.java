@@ -4,8 +4,6 @@ import hr.fer.tel.hmo.util.Util;
 import hr.fer.tel.hmo.vnf.Component;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -56,30 +54,11 @@ public class Placement {
 	}
 
 	/**
-	 * Permute this placement
+	 * Create a placement that has n components on shuffled.
+	 *
+	 * @param n number of components to shuffle
+	 * @return new placement
 	 */
-	private void permute() {
-		Util.shuffle(placement);
-	}
-
-	public List<Placement> neighbors(int x) {
-		List<Placement> neighbors = new LinkedList<>();
-		for (int i = 0; i < placement.length; i++) {
-			if (x == i) {
-				continue;
-			}
-			Placement p = copy();
-			if (Util.randomDouble() < 0.2) {
-				p.permute();
-			} else {
-				Util.swap(p.placement, i, x);
-			}
-			neighbors.add(p);
-		}
-
-		return neighbors;
-	}
-
 	public Placement neighbor(int n) {
 		int[] indexes = Util.rndIndexes(placement.length, n);
 		Placement p = copy();
@@ -95,7 +74,7 @@ public class Placement {
 	 * @param componentIndex component's index
 	 * @param serverIndex    server's index
 	 */
-	public void place(int componentIndex, int serverIndex) {
+	void place(int componentIndex, int serverIndex) {
 		placement[componentIndex] = serverIndex;
 	}
 

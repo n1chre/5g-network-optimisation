@@ -68,7 +68,6 @@ public class GreedyPlacer extends Placer {
 			}
 
 			if (sp == null) {
-				System.out.println("idiote");
 				// lolz
 				return next();
 			}

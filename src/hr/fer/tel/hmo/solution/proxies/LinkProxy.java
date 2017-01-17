@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 
 /**
- * Proxy class for link
+ * Proxy class for Link
  */
 public class LinkProxy implements Comparable<LinkProxy> {
 

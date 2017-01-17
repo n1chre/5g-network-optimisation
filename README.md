@@ -57,5 +57,5 @@ Try to use a link for which additional used power would be minimal until you get
 Use _Ant Colony Optimization (ACO)_ to find the _best_ route from component A to component B.
 
 ### Tying it together
-Used _tabu search_ to search neighbor solutions from a given initial solutions.
+Used _tabu search_ to search neighbor solutions from a given initial solution.
 

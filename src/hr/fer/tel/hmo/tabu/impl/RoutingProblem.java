@@ -30,7 +30,7 @@ public class RoutingProblem extends RoutingIterationLimitedProblem {
 
 		Set<RoutingSolution> neighbors = new HashSet<>();
 
-		int N = 42;
+		final int N = 16;
 		for (int i = 0; i < N; i++) {
 
 			Placement p = curr.getSolution().getPlacement().neighbor(6);

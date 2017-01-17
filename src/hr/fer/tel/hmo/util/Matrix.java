@@ -118,15 +118,4 @@ public class Matrix<K1, K2, V> {
 		}
 		map.compute(k2, (__, v) -> function.apply(v));
 	}
-
-	@Override
-	public String toString() {
-		StringJoiner mainJoiner = new StringJoiner("\n\t", "{\n\t", "\n}");
-		for (K1 k1 : keys()) {
-			for (Map.Entry<K2, V> e : getFor(k1).entrySet()) {
-				mainJoiner.add(k1 + " " + e.getKey() + " " + e.getValue());
-			}
-		}
-		return mainJoiner.toString();
-	}
 }

@@ -13,7 +13,6 @@ import hr.fer.tel.hmo.tabu.alg.TabuProblem;
 import hr.fer.tel.hmo.tabu.impl.RoutingProblem;
 import hr.fer.tel.hmo.tabu.impl.RoutingSolution;
 import hr.fer.tel.hmo.util.Matrix;
-import hr.fer.tel.hmo.util.Util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +31,7 @@ public class Main {
 
 	public static void main(String[] args) {
 
-//		args = new String[]{"./instance.txt"};
+		args = new String[]{"./instance.txt"};
 
 		InputStream stream;
 		if (args.length > 0) {
@@ -71,6 +70,7 @@ public class Main {
 		System.err.println("Starting tabu runs...");
 
 		for (int i = 0; i < TABU_RUNS; i++) {
+			// make parallel
 			new Solver(evaluator, router, placer, i).run();
 		}
 
@@ -118,13 +118,7 @@ public class Main {
 			RoutingSolution rs = Tabu.search(tp);
 			if (rs != null) {
 
-				try {
-					evaluator.assertSolution(rs.getSolution());
-				} catch (RuntimeException ex) {
-					System.out.println(rs.getSolution());
-					System.out.println(ex.getMessage());
-					return;
-				}
+				evaluator.assertSolution(rs.getSolution());
 
 				System.err.printf("-> %.2f%n", -rs.getFitness());
 
@@ -132,12 +126,6 @@ public class Main {
 					if (bestRS == null || rs.isBetterThan(bestRS)) {
 						bestRS = rs;
 						System.err.printf("Found new best solution (%.2f)!%n", -bestRS.getFitness());
-						try {
-							String fname = String.format("/Users/fhrenic/sols2/sol_%.2f.txt", -rs.getFitness());
-							Util.toFile(rs.getSolution().toString(), fname);
-						} catch (IOException ex) {
-							ex.printStackTrace();
-						}
 					}
 				}
 

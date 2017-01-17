@@ -297,6 +297,11 @@ public class Instance {
 		return serviceChains;
 	}
 
+	/**
+	 * Configure a matrix of demands (between each pair of communicating components)
+	 *
+	 * @return demands
+	 */
 	private Matrix<Integer, Integer, Double> configureDemands() {
 		Matrix<Integer, Integer, Double> demands = new Matrix<>();
 

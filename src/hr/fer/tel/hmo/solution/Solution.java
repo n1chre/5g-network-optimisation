@@ -40,10 +40,7 @@ public class Solution {
 
 		Solution solution = (Solution) o;
 
-		if (placement != null ? !placement.equals(solution.placement) : solution.placement != null) {
-			return false;
-		}
-		return routes != null ? routes.equals(solution.routes) : solution.routes == null;
+		return (placement != null ? placement.equals(solution.placement) : solution.placement == null) && (routes != null ? routes.equals(solution.routes) : solution.routes == null);
 	}
 
 	@Override

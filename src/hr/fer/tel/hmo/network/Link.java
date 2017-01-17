@@ -50,10 +50,7 @@ public class Link {
 		if (Double.compare(link.bandwidth, bandwidth) != 0) {
 			return false;
 		}
-		if (Double.compare(link.powerConsumption, powerConsumption) != 0) {
-			return false;
-		}
-		return Double.compare(link.delay, delay) == 0;
+		return Double.compare(link.powerConsumption, powerConsumption) == 0 && Double.compare(link.delay, delay) == 0;
 	}
 
 	@Override

@@ -90,11 +90,8 @@ public class Network {
 			return false;
 		}
 
-		if (nodes[n1] == null || nodes[n2] == null) {
-			return false;
-		}
+		return !(nodes[n1] == null || nodes[n2] == null) && links.put(n1, n2, link) == null;
 
-		return links.put(n1, n2, link) == null;
 	}
 
 	/**

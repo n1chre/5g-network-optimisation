@@ -153,22 +153,6 @@ public class Util {
 	}
 
 	/**
-	 * Shuffle values in an array
-	 * Uses Knuth's shuffling shuffle
-	 *
-	 * @param arr array to shuffle
-	 */
-	public static void shuffle(int[] arr) {
-		int n = arr.length;
-		if (n <= 1) {
-			return;
-		}
-		for (int i = n - 1; i > 0; --i) {
-			swap(arr, i, randomInt(i));
-		}
-	}
-
-	/**
 	 * swap ints at given positions in array
 	 *
 	 * @param arr array

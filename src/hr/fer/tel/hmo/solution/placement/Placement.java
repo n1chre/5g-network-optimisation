@@ -109,10 +109,7 @@ public class Placement {
 
 		Placement placement1 = (Placement) o;
 
-		if (numberOfServers != placement1.numberOfServers) {
-			return false;
-		}
-		return Arrays.equals(placement, placement1.placement);
+		return numberOfServers == placement1.numberOfServers && Arrays.equals(placement, placement1.placement);
 	}
 
 	@Override

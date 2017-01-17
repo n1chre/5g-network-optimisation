@@ -40,10 +40,7 @@ public class RoutingSolution {
 
 		RoutingSolution that = (RoutingSolution) o;
 
-		if (Double.compare(that.fitness, fitness) != 0) {
-			return false;
-		}
-		return solution.equals(that.solution);
+		return Double.compare(that.fitness, fitness) == 0 && solution.equals(that.solution);
 	}
 
 	@Override

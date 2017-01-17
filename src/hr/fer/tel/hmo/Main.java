@@ -31,7 +31,7 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		args = new String[]{"./instance.txt"};
+//		args = new String[]{"./instance.txt"};
 
 		InputStream stream;
 		if (args.length > 0) {

@@ -70,10 +70,7 @@ public class Route {
 		if (from != route.from) {
 			return false;
 		}
-		if (to != route.to) {
-			return false;
-		}
-		return Arrays.equals(nodes, route.nodes);
+		return to == route.to && Arrays.equals(nodes, route.nodes);
 	}
 
 	@Override

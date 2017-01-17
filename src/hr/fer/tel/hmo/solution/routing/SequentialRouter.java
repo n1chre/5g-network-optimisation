@@ -7,20 +7,15 @@ import hr.fer.tel.hmo.solution.proxies.LinkProxy;
 import hr.fer.tel.hmo.solution.proxies.NodeProxy;
 import hr.fer.tel.hmo.util.Matrix;
 import hr.fer.tel.hmo.util.Util;
+import hr.fer.tel.hmo.vnf.ServiceChain;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
  * Router that finds routes sequentially
  */
 public abstract class SequentialRouter extends Router {
-
-	// delay is always 20 FIXME
-	private static final double DEFAULT_DELAY = 20.0;
 
 	private final Topology topology;
 
@@ -85,25 +80,68 @@ public abstract class SequentialRouter extends Router {
 			CACHE[i] = nodeIdx.apply(i);
 		}
 
-		class tmp {
+		final class tmp {
 			private int cmp1, cmp2;
+			private double delay;
 			private double bandwidth;
-		}
 
-		List<tmp> tmps = new ArrayList<>();
-		Matrix<Integer, Integer, Double> demands = topology.getDemands();
-		for (int cmp1 : demands.keys()) {
-			for (Map.Entry<Integer, Double> e : demands.getFor(cmp1).entrySet()) {
-				tmp t = new tmp();
-				t.cmp1 = cmp1;
-				t.cmp2 = e.getKey();
-				t.bandwidth = e.getValue();
-				tmps.add(t);
+			private tmp(int cmp1, int cmp2, double delay, double bandwidth) {
+				this.cmp1 = cmp1;
+				this.cmp2 = cmp2;
+				this.delay = delay;
+				this.bandwidth = bandwidth;
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (this == o) {
+					return true;
+				}
+				if (!(o instanceof tmp)) {
+					return false;
+				}
+
+				tmp tmp = (tmp) o;
+
+				return cmp1 == tmp.cmp1 && cmp2 == tmp.cmp2;
+			}
+
+			@Override
+			public int hashCode() {
+				int result = cmp1;
+				result = 31 * result + cmp2;
+				return result;
 			}
 		}
-		Collections.shuffle(tmps, Util.RANDOM);
 
-		for (tmp t : tmps) {
+		Set<tmp> tmps = new HashSet<>();
+
+		for (ServiceChain sc : topology.getServiceChains()) {
+
+			int ncs = sc.getNumberOfComponents();
+			if (ncs <= 1) {
+				continue;
+			}
+
+			double delay = sc.getLatency();
+
+			int prevCompIdx = sc.getComponent(0).getIndex();
+			for (int i = 1; i < ncs; i++) {
+				int currCompIdx = sc.getComponent(i).getIndex();
+
+				Double bandwidth = topology.getDemands().get(prevCompIdx, currCompIdx);
+				tmps.add(new tmp(prevCompIdx, currCompIdx, delay, bandwidth));
+
+				prevCompIdx = currCompIdx;
+
+			}
+		}
+
+		// randomize
+		List<tmp> tmps_ = new ArrayList<>(tmps);
+		Collections.shuffle(tmps_, Util.RANDOM);
+
+		for (tmp t : tmps_) {
 			int node1 = CACHE[t.cmp1];
 			int node2 = CACHE[t.cmp2];
 
@@ -112,12 +150,10 @@ public abstract class SequentialRouter extends Router {
 				continue;
 			}
 
+			nodes[node1].used = true;
 			nodes[node2].used = true;
 
-			List<Integer> r = path(
-					nodes[node1], nodes[node2],
-					DEFAULT_DELAY, t.bandwidth
-			);
+			List<Integer> r = path(nodes[node1], nodes[node2], t.delay, t.bandwidth);
 			if (r == null) {
 				return null;
 			}

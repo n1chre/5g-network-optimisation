@@ -40,8 +40,14 @@ public class Evaluator {
 	 * @param solution solution you want to check
 	 */
 	public void assertSolution(Solution solution) {
-		if (!isValid(solution)) {
-			throw new RuntimeException("solution is not valid");
+		if (!isValid(solution.getPlacement())) {
+			throw new RuntimeException("Placement invalid");
+		}
+		if (!isLatencyValid(solution)) {
+			throw new RuntimeException("Latency invalid");
+		}
+		if (!isBandwidthValid(solution)) {
+			throw new RuntimeException("Bandwidth invalid");
 		}
 
 		final Placement p = solution.getPlacement();
@@ -153,23 +159,13 @@ public class Evaluator {
 	}
 
 	/**
-	 * Test if solution is valid
-	 *
-	 * @param s possible solution
-	 * @return true if solution is valid
-	 */
-	private boolean isValid(Solution s) {
-		return isLatencyValid(s) && isBandwidthValid(s);
-	}
-
-	/**
 	 * Check if all service chains have allowed latency
 	 *
 	 * @param s possible solution
 	 * @return true if all service chains have valid latency
 	 */
 	private boolean isLatencyValid(Solution s) {
-		return topology.getServiceChains().parallelStream().allMatch(sc -> this.isLatencyValidForServiceChain(s, sc));
+		return topology.getServiceChains().stream().allMatch(sc -> this.isLatencyValidForServiceChain(s, sc));
 	}
 
 	/**
@@ -182,7 +178,7 @@ public class Evaluator {
 	private boolean isLatencyValidForServiceChain(Solution solution, ServiceChain sc) {
 		Matrix<Integer, Integer, Route> routes = solution.getRoutes();
 
-		double lat = 0.0;
+		double delay = 0.0;
 
 		int n = sc.getNumberOfComponents();
 		for (int i = 1; i < n; i++) {
@@ -193,10 +189,10 @@ public class Evaluator {
 
 			int[] nodes = r.getNodes();
 			for (int j = 1; j < nodes.length; j++) {
-				lat += topology.getNetwork().getLink(nodes[j - 1], nodes[j]).getDelay();
+				delay += topology.getNetwork().getLink(nodes[j - 1], nodes[j]).getDelay();
 			}
 
-			if (lat > sc.getLatency()) {
+			if (delay > sc.getLatency()) {
 				return false;
 			}
 		}

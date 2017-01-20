@@ -4,9 +4,9 @@ import hr.fer.tel.hmo.network.Topology;
 import hr.fer.tel.hmo.solution.proxies.LinkProxy;
 import hr.fer.tel.hmo.solution.proxies.NodeProxy;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Routes connections over network (greedy)
@@ -19,46 +19,33 @@ public class GreedyRouter extends SequentialRouter {
 
 	@Override
 	protected List<Integer> path(NodeProxy from, NodeProxy end, double delay, double bandwidth) {
-		return path(from, end, delay, bandwidth, new HashSet<>(), new ArrayList<>());
-	}
+		LinkedHashSet<NodeProxy> path = new LinkedHashSet<>();
 
-	/**
-	 * Find a route that goes from one node to other with given demands
-	 *
-	 * @param from      start node
-	 * @param end       end node
-	 * @param delay     maximal delay
-	 * @param bandwidth demanded bandwidth
-	 * @param forbidden forbidden nodes
-	 * @param path      current path
-	 * @return list of nodes or null if route not found
-	 */
-	private List<Integer> path(NodeProxy from, NodeProxy end, double delay, double bandwidth,
-	                           HashSet<Integer> forbidden, List<Integer> path) {
-		path.add(from.node.getIndex());
+		path.add(from);
+		while (!from.equals(end)) {
 
-		if (from.equals(end)) {
-			return path;
+			from.used = true;
+
+			double _delay = delay;
+			LinkProxy best = neighbors.getFor(from).values().stream()
+					.filter(lp -> !path.contains(lp.to))
+					.filter(lp -> lp.validParams(_delay, bandwidth))
+					.min(new LinkProxy.LinkComp(end))
+					.orElse(null);
+
+			if (best == null) {
+				return null;
+			}
+
+			best.used = true;
+			best.bandwidth -= bandwidth;
+			delay -= best.delay;
+
+			from = best.to;
+			path.add(from);
 		}
 
-		from.used = true;
-		forbidden.add(from.node.getIndex());
-
-		LinkProxy best = neighbors.getFor(from).values().stream()
-				.filter(lp -> !forbidden.contains(lp.to.node.getIndex()))
-				.filter(lp -> lp.validParams(delay, bandwidth))
-				.min(new LinkProxy.LinkComp(end))
-				.orElse(null);
-
-		if (best == null) {
-			return null;
-		}
-
-		// use that link
-		best.used = true;
-		best.bandwidth -= bandwidth;
-
-		return path(best.to, end, delay - best.delay, bandwidth, forbidden, path);
+		return path.stream().map(np -> np.node.getIndex()).collect(Collectors.toList());
 	}
 
 }

@@ -31,7 +31,7 @@ public class Main {
 
 	public static void main(String[] args) {
 
-//		args = new String[]{"./instance.txt"};
+		args = new String[]{"./instance_big.txt"};
 
 		InputStream stream;
 		if (args.length > 0) {
@@ -107,18 +107,23 @@ public class Main {
 				p = placer.next();
 				rts = router.findRouting(p);
 			} while (rts == null);
-			if (!evaluator.isValid(p)) {
-				throw new RuntimeException("Initial placement not valid");
-			}
-
 			Solution s = new Solution(p, rts);
-			evaluator.assertSolution(s);
+
+			try {
+				evaluator.assertSolution(s);
+			} catch (RuntimeException ex) {
+				return;
+			}
 
 			TabuProblem<RoutingSolution> tp = new RoutingProblem(evaluator, router, s);
 			RoutingSolution rs = Tabu.search(tp);
 			if (rs != null) {
 
-				evaluator.assertSolution(rs.getSolution());
+				try {
+					evaluator.assertSolution(rs.getSolution());
+				} catch (RuntimeException ex) {
+					return;
+				}
 
 				System.err.printf("-> %.2f%n", -rs.getFitness());
 

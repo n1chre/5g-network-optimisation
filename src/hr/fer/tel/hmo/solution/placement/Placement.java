@@ -60,6 +60,7 @@ public class Placement {
 	 * @return new placement
 	 */
 	public Placement neighbor(int n) {
+		n = Math.min(n, placement.length);
 		int[] indexes = Util.rndIndexes(placement.length, n);
 		Placement p = copy();
 		for (int i = n - 1; i > 0; --i) {

@@ -165,7 +165,8 @@ public class Evaluator {
 	 * @return true if all service chains have valid latency
 	 */
 	private boolean isLatencyValid(Solution s) {
-		return topology.getServiceChains().stream().allMatch(sc -> this.isLatencyValidForServiceChain(s, sc));
+		return topology.getServiceChains().parallelStream()
+				.allMatch(sc -> isLatencyValidForServiceChain(s, sc));
 	}
 
 	/**
@@ -179,10 +180,15 @@ public class Evaluator {
 		Matrix<Integer, Integer, Route> routes = solution.getRoutes();
 
 		double delay = 0.0;
+		double latency = sc.getLatency();
 
-		int n = sc.getNumberOfComponents();
-		for (int i = 1; i < n; i++) {
-			Route r = routes.get(sc.getComponent(i - 1).getIndex(), sc.getComponent(i).getIndex());
+		int ncs = sc.getNumberOfComponents();
+
+		int prevCompIdx = sc.getComponent(0).getIndex();
+		for (int i = 1; i < ncs; i++) {
+			int currCompIdx = sc.getComponent(i).getIndex();
+
+			Route r = routes.get(prevCompIdx, currCompIdx);
 			if (r == null) {
 				throw new RuntimeException();
 			}
@@ -192,9 +198,11 @@ public class Evaluator {
 				delay += topology.getNetwork().getLink(nodes[j - 1], nodes[j]).getDelay();
 			}
 
-			if (delay > sc.getLatency()) {
+			if (delay > latency) {
 				return false;
 			}
+
+			prevCompIdx = currCompIdx;
 		}
 
 		return true;

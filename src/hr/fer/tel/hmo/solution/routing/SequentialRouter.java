@@ -153,6 +153,8 @@ public abstract class SequentialRouter extends Router {
 			nodes[node1].used = true;
 			nodes[node2].used = true;
 
+			// Ovo je krivo, delay treba racunati drukcije jer ovak trazim rutu s max delayom
+			// koji je zapravo delay za cijeli service chain (i to neki, prvi). zabrijal sam si
 			List<Integer> r = path(nodes[node1], nodes[node2], t.delay, t.bandwidth);
 			if (r == null) {
 				return null;
